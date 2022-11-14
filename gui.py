@@ -130,7 +130,7 @@ class mainWindow(QWidget):
                 outString = self.degN.text() + "," + self.degE.text()
                 ## save to file/output
         else:
-            if self.degE.text() or self.degN.text() == "":
+            if self.degE.text() == "" or self.degN.text() == "":
                 self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
 
         self.degE.clear()
