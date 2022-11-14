@@ -7,21 +7,19 @@ import time
 # 	time.sleep(10)
 
 def read_file():
-    with open("test.txt", "r") as f:
-        file = f.readlines()
+    with open("test.txt") as f:
+        file = f.read().splitlines()
     return file
 
 initial = read_file()
 
 while True:
 	current = read_file()
-	if initial != current:
-		for line in current:
-			if line not in initial:
-				timstamp = time.time()
-				print(timestamp-int(line))
+	if initial[-1:] != current[-1:]:
+		timestamp = time.time()
+		print(timestamp-float(current[-1:][0]))
 				
-		timestampstr = '\"\\n' + str(timestamp) + '\"'
-		os.system('echo -e '+timestampstr+' >> test.txt')
-
-		# initial = current
+		os.system('echo -e '+str(timestamp)+' >> test.txt')
+		initial = read_file()
+	
+	
