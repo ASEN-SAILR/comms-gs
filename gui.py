@@ -11,6 +11,13 @@ import cv2
 class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
+
+        #Import font
+        fontid = QFontDatabase.addApplicationFont("PTF55F.ttf")
+        #ptSer = QFontDatabase.applicationFontFamilies(fontid)
+
+        self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: 10pt PT Serif};")
+
         self.videoFeed = videoFeed()
         self.videoFeed.start()
 
