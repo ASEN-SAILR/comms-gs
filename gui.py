@@ -99,14 +99,14 @@ class mainWindow(QWidget):
         self.vidFeed.setPixmap(QPixmap.fromImage(image))
 
     def toggleMode(self):
-        global isManual
+        self.isManual
 
-        if isManual == 1:
+        if self.isManual == 1:
             self.controlIndicator.setText("Control Mode: Automated")
-            isManual = 0
+            self.isManual = 0
         else:
             self.controlIndicator.setText("Control Mode: Manual")
-            isManual = 1
+            self.isManual = 1
 
     def LOI(self):
         if self.degE.text().isnumeric() and self.degN.text().isnumeric:
@@ -123,8 +123,7 @@ class mainWindow(QWidget):
                 outString = self.degN.text() + "," + self.degE.text()
                 ## save to file/output
         else:
-            if self.degE.text() == "" or self.degN.text() == "":
-                self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
+            self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
 
         self.degE.clear()
         self.degN.clear()
