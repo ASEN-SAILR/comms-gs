@@ -12,6 +12,21 @@ class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
 
+        #Open files and clear contents
+        self.manualTxt = open("manual.txt",'w')
+        self.manualTxt.truncate(0)
+        self.manualTxt.close()
+
+        self.modeTxt = open("mode.txt",'w')
+        self.modeTxt.truncate(0)
+        self.modeTxt.close()
+        
+
+        self.loiTxt = open("loi.txt",'w')
+        self.loiTxt.truncate(0)
+        self.loiTxt.close()
+
+
         #Import font
         fontid = QFontDatabase.addApplicationFont("PTF55F.ttf")
         #ptSer = QFontDatabase.applicationFontFamilies(fontid)
@@ -127,8 +142,13 @@ class mainWindow(QWidget):
                 self.console.setText("LOI ACCEPTED: " + self.degN.text() + " Degrees North, " + self.degE.text() + " Degrees East")
                 priorText = self.priorCommands.text()
                 self.priorCommands.setText(priorText + "\nLOI: " + self.degN.text() + u' \N{DEGREE SIGN}N ' + self.degE.text() + u' \N{DEGREE SIGN}E')
+
+                # Write output to file
                 outString = self.degN.text() + "," + self.degE.text()
-                ## save to file/output
+
+                self.loiTxt = open("loi.txt","w")
+                self.loiTxt.write(outString)
+                self.loiTxt.close()
         else:
             self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
 
@@ -140,7 +160,15 @@ class mainWindow(QWidget):
             self.console.setText("MANUAL CONTROL ACCEPTED: Forward " + self.forwardW.text() + " meters")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nForward: " + self.forwardW.text() + " m")
+
+            # Write output to file
             
+            outString = "0,0," + self.forwardW.text() + "\n"
+
+            self.manualTxt = open("manual.txt","a")
+            self.manualTxt.write(outString)
+            self.manualTxt.close()
+
         else:
             if self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
