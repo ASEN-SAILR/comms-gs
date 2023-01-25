@@ -31,7 +31,7 @@ class mainWindow(QWidget):
         fontid = QFontDatabase.addApplicationFont("PTF55F.ttf")
         #ptSer = QFontDatabase.applicationFontFamilies(fontid)
 
-        self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: 10pt PT Serif};")
+        self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: 20pt PT Serif};")
 
         self.videoFeed = videoFeed()
         self.videoFeed.start()
@@ -131,7 +131,7 @@ class mainWindow(QWidget):
             self.isManual = 1
 
     def LOI(self):
-        if self.degE.text().isnumeric() and self.degN.text().isnumeric:
+        if self.degE.text().lstrip("-").isnumeric() and self.degN.text().lstrip("-").isnumeric:
             degENum = float(self.degE.text())
             degNNum = float(self.degN.text())
 
