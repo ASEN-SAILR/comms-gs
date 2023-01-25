@@ -80,6 +80,10 @@ class mainWindow(QWidget):
         self.rightW.setPlaceholderText("Turn Right [deg]")
         self.rightW.returnPressed.connect(self.turnRight)
 
+        self.stopButton = QPushButton("STOP")
+        self.isStop = 0
+        self.stopButton.clicked.connect(self.toggleStop)
+
         self.console = QLabel(" ")
 
         # Set layout
@@ -111,7 +115,9 @@ class mainWindow(QWidget):
 
         self.layout.addWidget(self.rightW, 4, 4)
 
-        self.layout.addWidget(self.console, 5, 0, 1, 5)
+        self.layout.addWidget(self.stopButton, 5, 0, 1, 5)
+
+        self.layout.addWidget(self.console, 6, 0, 1, 5)
 
         self.setLayout(self.layout)
 
@@ -207,6 +213,14 @@ class mainWindow(QWidget):
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
         
         self.rightW.clear()
+
+    def toggleStop(self):
+        if self.isStop == 0:
+            self.stopButton.setText("START")
+            self.isStop = 1
+        elif self.isStop == 1:
+            self.stopButton.setText("STOP")
+            self.isStop = 0
     
 
 class videoFeed(QThread):
