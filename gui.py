@@ -19,6 +19,7 @@ class mainWindow(QWidget):
 
         self.modeTxt = open("mode.txt",'w')
         self.modeTxt.truncate(0)
+        self.modeTxt.write("0")
         self.modeTxt.close()
         
 
@@ -31,7 +32,7 @@ class mainWindow(QWidget):
         fontid = QFontDatabase.addApplicationFont("PTF55F.ttf")
         #ptSer = QFontDatabase.applicationFontFamilies(fontid)
 
-        self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: 20pt PT Serif};")
+        self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: PT Serif};")
 
         self.videoFeed = videoFeed()
         self.videoFeed.start()
@@ -126,9 +127,21 @@ class mainWindow(QWidget):
         if self.isManual == 1:
             self.controlIndicator.setText("Control Mode: Automated")
             self.isManual = 0
+
+            self.modeTxt = open("mode.txt",'w')
+            self.modeTxt.truncate(0)
+            self.modeTxt.write("1")
+            self.modeTxt.close()
+
         else:
             self.controlIndicator.setText("Control Mode: Manual")
             self.isManual = 1
+
+            self.modeTxt = open("mode.txt",'w')
+            self.modeTxt.truncate(0)
+            self.modeTxt.write("0")
+            self.modeTxt.close()
+
 
     def LOI(self):
         if self.degE.text().lstrip("-").isnumeric() and self.degN.text().lstrip("-").isnumeric:
@@ -180,6 +193,15 @@ class mainWindow(QWidget):
             self.console.setText("MANUAL CONTROL ACCEPTED: Backward " + self.backwardW.text() + " meters")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nBackward: " + self.backwardW.text() + " m")
+
+            # Write output to file
+            
+            outString = "0,1," + self.backwardW.text() + "\n"
+
+            self.manualTxt = open("manual.txt","a")
+            self.manualTxt.write(outString)
+            self.manualTxt.close()
+
         else:
             if self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
@@ -191,6 +213,15 @@ class mainWindow(QWidget):
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.leftW.text() + " degrees left")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nLeft: " + self.leftW.text() + u' \N{DEGREE SIGN}')
+
+            # Write output to file
+            
+            outString = "1,0," + self.leftW.text() + "\n"
+
+            self.manualTxt = open("manual.txt","a")
+            self.manualTxt.write(outString)
+            self.manualTxt.close()
+
         else:
             if self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
@@ -202,6 +233,15 @@ class mainWindow(QWidget):
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.rightW.text() + " degrees right")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nRight: " + self.rightW.text() + u' \N{DEGREE SIGN}')
+
+            # Write output to file
+            
+            outString = "1,1," + self.rightW.text() + "\n"
+
+            self.manualTxt = open("manual.txt","a")
+            self.manualTxt.write(outString)
+            self.manualTxt.close()
+
         else:
             if self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
@@ -220,7 +260,9 @@ class videoFeed(QThread):
         
         # Boolean for if video active
         self.videoActive = True
+
         # Initialize video capture of default device
+        
         vidCap = cv2.VideoCapture(0)
         while self.videoActive:
             # isFrame bool for presence of frame, frame contains current frame
@@ -249,5 +291,5 @@ class videoFeed(QThread):
 app = QApplication(sys.argv)
 root = mainWindow()
 root.setWindowTitle("Ground Station")
-root.show()
+root.showMaximized()
 sys.exit(app.exec())
