@@ -8,25 +8,19 @@ from PyQt6.QtGui import *
 
 import cv2
 
+import time
+
 class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
 
         #Open files and clear contents
-        self.manualTxt = open("manual.txt",'w')
-        self.manualTxt.truncate(0)
-        self.manualTxt.close()
+        self.outTxt = open("out.txt",'w')
+        self.outTxt.truncate(0)
+        self.outTxt.close()
 
-        self.modeTxt = open("mode.txt",'w')
-        self.modeTxt.truncate(0)
-        self.modeTxt.write("0")
-        self.modeTxt.close()
-        
-
-        self.loiTxt = open("loi.txt",'w')
-        self.loiTxt.truncate(0)
-        self.loiTxt.close()
-
+        #Initialize command counter
+        self.commandNum = 0
 
         #Import font
         fontid = QFontDatabase.addApplicationFont("PTF55F.ttf")
@@ -44,7 +38,6 @@ class mainWindow(QWidget):
         self.imDisp = QLabel()
         pixmap = QPixmap('SAILR logo.jpg')
         self.imDisp.setPixmap(pixmap)
-
 
         self.priorCommands = QLabel()
         self.scrollArea = QScrollArea()
@@ -84,6 +77,10 @@ class mainWindow(QWidget):
         self.stopButton = QPushButton("STOP")
         self.isStop = 0
         self.stopButton.clicked.connect(self.toggleStop)
+        self.stopButton.setStyleSheet("background-color : red")
+
+        self.curPosition = QLabel("Current Position:")
+        # add file manager and signal
 
         self.console = QLabel(" ")
 
@@ -116,7 +113,9 @@ class mainWindow(QWidget):
 
         self.layout.addWidget(self.rightW, 4, 4)
 
-        self.layout.addWidget(self.stopButton, 5, 0, 1, 5)
+        self.layout.addWidget(self.stopButton, 5, 0, 1, 3)
+
+        self.layout.addWidget(self.curPosition, 5, 3, 1, 2)
 
         self.layout.addWidget(self.console, 6, 0, 1, 5)
 
@@ -128,28 +127,46 @@ class mainWindow(QWidget):
         self.vidFeed.setPixmap(QPixmap.fromImage(image))
 
     def toggleMode(self):
-        self.isManual
+
+        self.commandNum += 1
 
         if self.isManual == 1:
-            self.controlIndicator.setText("Control Mode: Automated")
+            self.console.setText("CONTROL MODE SET TO AUTONOMOUS")
+            priorText = self.priorCommands.text()
+            self.priorCommands.setText(priorText + "\nControl mode set to autonomous")
+
+            self.controlIndicator.setText("Control Mode: Autonomous")
             self.isManual = 0
 
-            self.modeTxt = open("mode.txt",'w')
-            self.modeTxt.truncate(0)
-            self.modeTxt.write("1")
-            self.modeTxt.close()
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
+
+            outString = str(self.commandNum) + ", mode, autonomous, " + current_time + "\n"
+
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
 
         else:
+            self.console.setText("CONTROL MODE SET TO MANUAL")
+            priorText = self.priorCommands.text()
+            self.priorCommands.setText(priorText + "\nControl mode set to manual")
+
             self.controlIndicator.setText("Control Mode: Manual")
             self.isManual = 1
 
-            self.modeTxt = open("mode.txt",'w')
-            self.modeTxt.truncate(0)
-            self.modeTxt.write("0")
-            self.modeTxt.close()
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
+
+            outString = str(self.commandNum) + ", mode, manual, " + current_time + "\n"
+
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
 
 
     def LOI(self):
+
         if self.degE.text().lstrip("-").isnumeric() and self.degN.text().lstrip("-").isnumeric:
             degENum = float(self.degE.text())
             degNNum = float(self.degN.text())
@@ -158,16 +175,21 @@ class mainWindow(QWidget):
                 #console.setText(u"LOI IGNORED: -90 " + u'≤' " Degrees North " + u'≤' + " , -180 " + u'≤' + " Degrees East "  + u'≤' )
                 self.console.setText(u"LOI IGNORED: -90 ≤ Degrees North ≤ , -180 ≤ Degrees East ≤ 180")
             else:
+                self.commandNum += 1
+            
                 self.console.setText("LOI ACCEPTED: " + self.degN.text() + " Degrees North, " + self.degE.text() + " Degrees East")
                 priorText = self.priorCommands.text()
-                self.priorCommands.setText(priorText + "\nLOI: " + self.degN.text() + u' \N{DEGREE SIGN}N ' + self.degE.text() + u' \N{DEGREE SIGN}E')
+                self.priorCommands.setText(priorText + "\nLOI: " + self.degN.text() + u'\N{DEGREE SIGN}N ' + self.degE.text() + u'\N{DEGREE SIGN}E')
+
+                t = time.localtime()
+                current_time = time.strftime("%H:%M:%S", t)
 
                 # Write output to file
-                outString = self.degN.text() + "," + self.degE.text()
+                outString = str(self.commandNum) + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
 
-                self.loiTxt = open("loi.txt","w")
-                self.loiTxt.write(outString)
-                self.loiTxt.close()
+                self.outTxt = open("out.txt",'a')
+                self.outTxt.write(outString)
+                self.outTxt.close()
         else:
             self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
 
@@ -175,18 +197,23 @@ class mainWindow(QWidget):
         self.degN.clear()
 
     def moveForward(self):
-        if self.forwardW.text().isnumeric:
+
+        if self.forwardW.text().isnumeric():
+            self.commandNum += 1            
+
             self.console.setText("MANUAL CONTROL ACCEPTED: Forward " + self.forwardW.text() + " meters")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nForward: " + self.forwardW.text() + " m")
 
-            # Write output to file
-            
-            outString = "0,0," + self.forwardW.text() + "\n"
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
 
-            self.manualTxt = open("manual.txt","a")
-            self.manualTxt.write(outString)
-            self.manualTxt.close()
+            # Write output to file
+            outString = str(self.commandNum) + ", command, " + "translate, " + self.forwardW.text() + ", " + current_time + "\n"
+
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
 
         else:
             if self.forwardW.text() != "":
@@ -195,18 +222,23 @@ class mainWindow(QWidget):
         self.forwardW.clear()
 
     def moveBackward(self):
+
         if self.backwardW.text().isnumeric():
+            self.commandNum += 1
+
             self.console.setText("MANUAL CONTROL ACCEPTED: Backward " + self.backwardW.text() + " meters")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nBackward: " + self.backwardW.text() + " m")
 
-            # Write output to file
-            
-            outString = "0,1," + self.backwardW.text() + "\n"
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
 
-            self.manualTxt = open("manual.txt","a")
-            self.manualTxt.write(outString)
-            self.manualTxt.close()
+            # Write output to file
+            outString = str(self.commandNum) + ", command, " + "translate, -" + self.backwardW.text() + ", " + current_time + "\n"
+
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
 
         else:
             if self.forwardW.text() != "":
@@ -215,18 +247,23 @@ class mainWindow(QWidget):
         self.backwardW.clear()
 
     def turnLeft(self):
+
         if self.leftW.text().isnumeric:
+            self.commandNum += 1
+
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.leftW.text() + " degrees left")
             priorText = self.priorCommands.text()
-            self.priorCommands.setText(priorText + "\nLeft: " + self.leftW.text() + u' \N{DEGREE SIGN}')
+            self.priorCommands.setText(priorText + "\nLeft: " + self.leftW.text() + u'\N{DEGREE SIGN}')
+
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            
-            outString = "1,0," + self.leftW.text() + "\n"
+            outString = str(self.commandNum) + ", command, " + "rotate, " + self.leftW.text() + ", " + current_time + "\n"
 
-            self.manualTxt = open("manual.txt","a")
-            self.manualTxt.write(outString)
-            self.manualTxt.close()
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
 
         else:
             if self.forwardW.text() != "":
@@ -235,18 +272,23 @@ class mainWindow(QWidget):
         self.leftW.clear()
 
     def turnRight(self):
+
         if self.rightW.text().isnumeric():
+            self.commandNum += 1
+
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.rightW.text() + " degrees right")
             priorText = self.priorCommands.text()
-            self.priorCommands.setText(priorText + "\nRight: " + self.rightW.text() + u' \N{DEGREE SIGN}')
+            self.priorCommands.setText(priorText + "\nRight: " + self.rightW.text() + u'\N{DEGREE SIGN}')
+
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            
-            outString = "1,1," + self.rightW.text() + "\n"
+            outString = str(self.commandNum) + ", command, " + "rotate, -" + self.rightW.text() + ", " + current_time + "\n"
 
-            self.manualTxt = open("manual.txt","a")
-            self.manualTxt.write(outString)
-            self.manualTxt.close()
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
 
         else:
             if self.forwardW.text() != "":
@@ -255,12 +297,44 @@ class mainWindow(QWidget):
         self.rightW.clear()
 
     def toggleStop(self):
+
+        self.commandNum += 1
+        
         if self.isStop == 0:
+            self.console.setText("EMERGENCY STOP INITIATED")
+            priorText = self.priorCommands.text()
+            self.priorCommands.setText(priorText + "\nEmergency stop initiated")
+
             self.stopButton.setText("START")
             self.isStop = 1
+
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
+
+            # Write output to file
+            outString = str(self.commandNum) + ", stop, " + current_time + "\n"
+
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
+
         elif self.isStop == 1:
+            self.console.setText("EMERGENCY STOP CANCELED")
+            priorText = self.priorCommands.text()
+            self.priorCommands.setText(priorText + "\nEmergency stop canceled")
+
             self.stopButton.setText("STOP")
             self.isStop = 0
+
+            t = time.localtime()
+            current_time = time.strftime("%H:%M:%S", t)
+
+            # Write output to file
+            outString = str(self.commandNum) + ", start, " + current_time + "\n"
+
+            self.outTxt = open("out.txt",'a')
+            self.outTxt.write(outString)
+            self.outTxt.close()
     
 
 class videoFeed(QThread):
