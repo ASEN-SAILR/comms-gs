@@ -80,6 +80,8 @@ class mainWindow(QWidget):
         self.stopButton.setStyleSheet("background-color : red")
 
         self.curPosition = QLabel("Current Position:")
+        self.fileWatch = QFileSystemWatcher("roverLocation.txt")
+        self.fileWatch.fileChanged("roverLocation.txt").connect(self.changePosition)
         # add file manager and signal
 
         self.console = QLabel(" ")
@@ -336,6 +338,10 @@ class mainWindow(QWidget):
             self.outTxt.write(outString)
             self.outTxt.close()
     
+    def changePosition(self):
+        locationTxt = open("roverLocation.txt",'r')
+        roverLoc = locationTxt.read().split(',')
+        self.curPosition.setText("Current Position: " + roverLoc(0) + "\N{DEGREE SIGN}N, " + roverLoc(1) + "\N{DEGREE SIGN}E")
 
 class videoFeed(QThread):
     # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
