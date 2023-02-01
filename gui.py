@@ -170,7 +170,7 @@ class mainWindow(QWidget):
 
     def LOI(self):
 
-        if self.degE.text().lstrip("-").isnumeric() and self.degN.text().lstrip("-").isnumeric:
+        if self.degE.text().lstrip('-').replace('.','',1).isnumeric() and self.degN.text().lstrip('-').replace('.','',1).isnumeric():
             degENum = float(self.degE.text())
             degNNum = float(self.degN.text())
 
