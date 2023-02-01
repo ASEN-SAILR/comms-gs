@@ -45,7 +45,7 @@ class mainWindow(QWidget):
         self.scrollArea.setWidget(self.priorCommands)
 
         self.togControl = QPushButton("Toggle manual control")
-        self.isManual = 1
+        self.controlMode = "manual"
         self.togControl.clicked.connect(self.toggleMode)
 
         self.controlIndicator = QLabel("Control Mode: Manual")
@@ -80,8 +80,9 @@ class mainWindow(QWidget):
         self.stopButton.setStyleSheet("background-color : red")
 
         self.curPosition = QLabel("Current Position:")
-        self.fileWatch = QFileSystemWatcher("roverLocation.txt")
-        self.fileWatch.fileChanged("roverLocation.txt").connect(self.changePosition)
+        self.fileWatch = QFileSystemWatcher()
+        self.fileWatch.addPath("roverLocation.txt")
+        self.fileWatch.fileChanged.connect(self.changePosition)
         # add file manager and signal
 
         self.console = QLabel(" ")
@@ -132,13 +133,13 @@ class mainWindow(QWidget):
 
         self.commandNum += 1
 
-        if self.isManual == 1:
+        if self.controlMode == "manual":
             self.console.setText("CONTROL MODE SET TO AUTONOMOUS")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nControl mode set to autonomous")
 
             self.controlIndicator.setText("Control Mode: Autonomous")
-            self.isManual = 0
+            self.controlMode = "autonomous"
 
             t = time.localtime()
             current_time = time.strftime("%H:%M:%S", t)
@@ -149,13 +150,13 @@ class mainWindow(QWidget):
             self.outTxt.write(outString)
             self.outTxt.close()
 
-        else:
+        elif self.controlMode == "autonomous":
             self.console.setText("CONTROL MODE SET TO MANUAL")
             priorText = self.priorCommands.text()
             self.priorCommands.setText(priorText + "\nControl mode set to manual")
 
             self.controlIndicator.setText("Control Mode: Manual")
-            self.isManual = 1
+            self.controlMode = "manual"
 
             t = time.localtime()
             current_time = time.strftime("%H:%M:%S", t)
@@ -187,7 +188,7 @@ class mainWindow(QWidget):
                 current_time = time.strftime("%H:%M:%S", t)
 
                 # Write output to file
-                outString = str(self.commandNum) + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
+                outString = str(self.commandNum) + ", mode, " + self.controlMode + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
 
                 self.outTxt = open("out.txt",'a')
                 self.outTxt.write(outString)
@@ -200,7 +201,7 @@ class mainWindow(QWidget):
 
     def moveForward(self):
 
-        if self.forwardW.text().isnumeric():
+        if self.forwardW.text().isnumeric() and self.controlMode == "manual":
             self.commandNum += 1            
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Forward " + self.forwardW.text() + " meters")
@@ -211,21 +212,23 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", command, " + "translate, " + self.forwardW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", mode, manual, translate, " + self.forwardW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
 
         else:
-            if self.forwardW.text() != "":
+            if self.controlMode != "manual":
+                self.console.setText("MANUAL CONTROL IGNORED: Control mode set to autonomous")
+            elif self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
         
         self.forwardW.clear()
 
     def moveBackward(self):
 
-        if self.backwardW.text().isnumeric():
+        if self.backwardW.text().isnumeric() and self.controlMode == "manual":
             self.commandNum += 1
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Backward " + self.backwardW.text() + " meters")
@@ -236,21 +239,23 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", command, " + "translate, -" + self.backwardW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", mode, manual, translate, -" + self.backwardW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
 
         else:
-            if self.forwardW.text() != "":
+            if self.controlMode != "manual":
+                self.console.setText("MANUAL CONTROL IGNORED: Control mode set to autonomous")
+            elif self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
         
         self.backwardW.clear()
 
     def turnLeft(self):
 
-        if self.leftW.text().isnumeric:
+        if self.leftW.text().isnumeric and self.controlMode == "manual":
             self.commandNum += 1
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.leftW.text() + " degrees left")
@@ -261,21 +266,23 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", command, " + "rotate, " + self.leftW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", mode, manual, rotate, -" + self.leftW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
 
         else:
-            if self.forwardW.text() != "":
+            if self.controlMode != "manual":
+                self.console.setText("MANUAL CONTROL IGNORED: Control mode set to autonomous")
+            elif self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
         
         self.leftW.clear()
 
     def turnRight(self):
 
-        if self.rightW.text().isnumeric():
+        if self.rightW.text().isnumeric() and self.controlMode == "manual":
             self.commandNum += 1
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.rightW.text() + " degrees right")
@@ -286,14 +293,16 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", command, " + "rotate, -" + self.rightW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", mode, manual, rotate, " + self.rightW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
 
         else:
-            if self.forwardW.text() != "":
+            if self.controlMode != "manual":
+                self.console.setText("MANUAL CONTROL IGNORED: Control mode set to autonomous")
+            elif self.forwardW.text() != "":
                 self.console.setText("MANUAL CONTROL IGNORED: Input not numeric")
         
         self.rightW.clear()
@@ -341,7 +350,8 @@ class mainWindow(QWidget):
     def changePosition(self):
         locationTxt = open("roverLocation.txt",'r')
         roverLoc = locationTxt.read().split(',')
-        self.curPosition.setText("Current Position: " + roverLoc(0) + "\N{DEGREE SIGN}N, " + roverLoc(1) + "\N{DEGREE SIGN}E")
+        if len(roverLoc) == 2:
+            self.curPosition.setText("Current Position: " + roverLoc[0] + "\N{DEGREE SIGN}N, " + roverLoc[1] + "\N{DEGREE SIGN}E")
 
 class videoFeed(QThread):
     # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
