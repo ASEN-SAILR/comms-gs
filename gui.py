@@ -6,13 +6,25 @@ from PyQt6.QtWidgets import *
 
 from PyQt6.QtGui import *
 
+from PyQt6.QtMultimedia import *
+
+from PyQt6.QtMultimediaWidgets import *
+
 import cv2
 
 import time
 
+import os
+
 class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
+
+        # R-sync info
+        self.system_password = 'asen4018'
+        self.sender_path = '/root/comms-gs/out.txt'
+        self.receiver_ip = '192.168.56.102'
+        self.receiver_path = self.receiver_ip +':/root/comms-gs/out.txt'
 
         #Open files and clear contents
         self.outTxt = open("out.txt",'w')
@@ -28,16 +40,33 @@ class mainWindow(QWidget):
 
         self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: PT Serif};")
 
+        # Start video feed
         self.videoFeed = videoFeed()
         self.videoFeed.start()
+
+        # Start video player
+        self.videoPlayer = QMediaPlayer()
 
         # Initialize widgets
         self.vidFeed = QLabel()
         self.videoFeed.imageUpdate.connect(self.imUpdate)
 
+        self.vidPlayer = QVideoWidget()
+        self.videoPlayer.setVideoOutput(self.vidPlayer)
+        cwd = os.getcwd()
+        self.vidFileWach = QFileSystemWatcher([cwd])
+        self.vidNumber = 1
+        #self.vidFileWach.addPath("video1.mp4")
+        self.vidFileWach.directoryChanged.connect(self.playVid)
+
         self.imDisp = QLabel()
-        pixmap = QPixmap('SAILR logo.jpg')
+        #pixmap = QPixmap('SAILR logo.jpg')
+        pixmap = QPixmap('roverOutImage.png')
         self.imDisp.setPixmap(pixmap)
+        self.scrollAreaImage = QScrollArea()
+        self.scrollAreaImage.setWidgetResizable(False)
+        self.scrollAreaImage.resize(360,360)
+        self.scrollAreaImage.setWidget(self.imDisp)
 
         self.priorCommands = QLabel()
         self.scrollArea = QScrollArea()
@@ -90,9 +119,13 @@ class mainWindow(QWidget):
         # Set layout
         self.layout = QGridLayout()
 
-        self.layout.addWidget(self.vidFeed, 0, 0, 3, 2)
+        # For live video stream
+        #self.layout.addWidget(self.vidFeed, 0, 0, 3, 2)
 
-        self.layout.addWidget(self.imDisp, 0, 2, 3, 2)
+        # For video file player
+        self.layout.addWidget(self.vidPlayer, 0, 0, 2, 4)
+
+        self.layout.addWidget(self.scrollAreaImage, 2, 0, 1, 4)
 
         self.layout.addWidget(self.scrollArea, 0 , 4, 3, 1)
 
@@ -124,7 +157,19 @@ class mainWindow(QWidget):
 
         self.setLayout(self.layout)
 
-        
+    def playVid(self):
+        if os.path.isfile("video"+str(self.vidNumber)+".mp4"):
+            if self.vidNumber == 1:
+                #first vid
+                self.videoPlayer.setSource(QUrl.fromLocalFile("video"+str(self.vidNumber)+".mp4"))
+                self.videoPlayer.play()
+                self.vidNumber += 1
+            elif self.vidNumber > 1 and self.videoPlayer.duration == self.videoPlayer.position:
+                #not first vid
+                self.videoPlayer.setSource(QUrl.fromLocalFile("video"+str(self.vidNumber)+".mp4"))
+                self.videoPlayer.play()
+                self.vidNumber += 1
+
     def imUpdate(self, image):
         # Set pixelmap of vidFeed widget to display image
         self.vidFeed.setPixmap(QPixmap.fromImage(image))
@@ -149,6 +194,8 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
+            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+
 
         elif self.controlMode == "autonomous":
             self.console.setText("CONTROL MODE SET TO MANUAL")
@@ -166,6 +213,8 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
+            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+
 
 
     def LOI(self):
@@ -193,6 +242,8 @@ class mainWindow(QWidget):
                 self.outTxt = open("out.txt",'a')
                 self.outTxt.write(outString)
                 self.outTxt.close()
+                #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+
         else:
             self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
 
@@ -217,6 +268,8 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
+            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+
 
         else:
             if self.controlMode != "manual":
@@ -244,6 +297,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
+            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
 
         else:
             if self.controlMode != "manual":
@@ -271,6 +325,8 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
+            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+
 
         else:
             if self.controlMode != "manual":
@@ -298,6 +354,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
+            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
 
         else:
             if self.controlMode != "manual":
@@ -328,6 +385,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
+            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
 
         elif self.isStop == 1:
             self.console.setText("EMERGENCY STOP CANCELED")
