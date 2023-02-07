@@ -47,25 +47,28 @@ class mainWindow(QWidget):
         # Start video player
         self.videoPlayer = QMediaPlayer()
 
-        # Initialize widgets
+        # Initialize widgets --------------------------
+
+        # Video feed widget (live feed)
         self.vidFeed = QLabel()
         self.videoFeed.imageUpdate.connect(self.imUpdate)
 
+        # Video player widget (file playback)
         self.vidPlayer = QVideoWidget()
         self.videoPlayer.setVideoOutput(self.vidPlayer)
         cwd = os.getcwd()
-        self.vidFileWach = QFileSystemWatcher([cwd])
+        self.vidFileWatch = QFileSystemWatcher([cwd])
         self.vidNumber = 1
-        #self.vidFileWach.addPath("video1.mp4")
-        self.vidFileWach.directoryChanged.connect(self.playVid)
+        self.vidFileWatch.directoryChanged.connect(self.playVid)
+        self.videoPlayer.mediaStatusChanged.connect(self.playVid)
 
         self.imDisp = QLabel()
         #pixmap = QPixmap('SAILR logo.jpg')
-        pixmap = QPixmap('roverOutImage.png')
+        pixmap = QPixmap('SAILR logo extended.jpg')
         self.imDisp.setPixmap(pixmap)
         self.scrollAreaImage = QScrollArea()
-        self.scrollAreaImage.setWidgetResizable(False)
-        self.scrollAreaImage.resize(360,360)
+        #self.scrollAreaImage.setWidgetResizable(True)
+        self.scrollAreaImage.setFixedHeight(380)
         self.scrollAreaImage.setWidget(self.imDisp)
 
         self.priorCommands = QLabel()
@@ -158,14 +161,9 @@ class mainWindow(QWidget):
         self.setLayout(self.layout)
 
     def playVid(self):
+        # Function to play video when file is added to system or last video stops playing
         if os.path.isfile("video"+str(self.vidNumber)+".mp4"):
-            if self.vidNumber == 1:
-                #first vid
-                self.videoPlayer.setSource(QUrl.fromLocalFile("video"+str(self.vidNumber)+".mp4"))
-                self.videoPlayer.play()
-                self.vidNumber += 1
-            elif self.vidNumber > 1 and self.videoPlayer.duration == self.videoPlayer.position:
-                #not first vid
+            if (self.videoPlayer.mediaStatus() == QMediaPlayer.MediaStatus.EndOfMedia) or (self.videoPlayer.mediaStatus() == QMediaPlayer.MediaStatus.NoMedia):
                 self.videoPlayer.setSource(QUrl.fromLocalFile("video"+str(self.vidNumber)+".mp4"))
                 self.videoPlayer.play()
                 self.vidNumber += 1
