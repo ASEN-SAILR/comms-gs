@@ -35,14 +35,14 @@ class mainWindow(QWidget):
         self.commandNum = 0
 
         #Import font
-        fontid = QFontDatabase.addApplicationFont("PTF55F.ttf")
+        #fontid = QFontDatabase.addApplicationFont("PTF55F.ttf")
         #ptSer = QFontDatabase.applicationFontFamilies(fontid)
 
         self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: PT Serif};")
 
         # Start video feed
-        self.videoFeed = videoFeed()
-        self.videoFeed.start()
+        #self.videoFeed = videoFeed()
+        #self.videoFeed.start()
 
         # Start video player
         self.videoPlayer = QMediaPlayer()
@@ -50,8 +50,8 @@ class mainWindow(QWidget):
         # Initialize widgets --------------------------
 
         # Video feed widget (live feed)
-        self.vidFeed = QLabel()
-        self.videoFeed.imageUpdate.connect(self.imUpdate)
+        #self.vidFeed = QLabel()
+        #self.videoFeed.imageUpdate.connect(self.imUpdate)
 
         # Video player widget (file playback)
         self.vidPlayer = QVideoWidget()
