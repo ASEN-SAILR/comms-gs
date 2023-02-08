@@ -25,6 +25,7 @@ class mainWindow(QWidget):
         self.sender_path = '/root/comms-gs/out.txt'
         self.receiver_ip = '192.168.56.102'
         self.receiver_path = self.receiver_ip +':/root/comms-gs/out.txt'
+        self.commandString = "sshpass -p '" + self.system_password+"' rsync -ave ssh " + self.sender_path + " " + self.receiver_path
 
         #Open files and clear contents
         self.outTxt = open("out.txt",'w')
@@ -192,7 +193,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+            os.system(self.commandString)
 
 
         elif self.controlMode == "autonomous":
@@ -211,7 +212,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+            os.system(self.commandString)
 
 
 
@@ -240,7 +241,7 @@ class mainWindow(QWidget):
                 self.outTxt = open("out.txt",'a')
                 self.outTxt.write(outString)
                 self.outTxt.close()
-                #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+                os.system(self.commandString)
 
         else:
             self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
@@ -266,7 +267,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+            os.system(self.commandString)
 
 
         else:
@@ -295,7 +296,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+            os.system(self.commandString)
 
         else:
             if self.controlMode != "manual":
@@ -323,7 +324,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+            os.system(self.commandString)
 
 
         else:
@@ -352,7 +353,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+            os.system(self.commandString)
 
         else:
             if self.controlMode != "manual":
@@ -383,7 +384,7 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system("sshpass -p '"+system_password+"' rsync -ave ssh "+sender_path+" "+receiver_path)
+            os.system(self.commandString)
 
         elif self.isStop == 1:
             self.console.setText("EMERGENCY STOP CANCELED")
