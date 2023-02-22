@@ -1,0 +1,7 @@
+rsync -ave ssh ~/comms-gs/test_commands.txt sailr@169.254.179.9:~/SeniorProjects/comms-gs/test_commands.txt
+
+rsync -ave ssh  ~/SeniorProjects/comms-gs/test_coords.txt ground-station@192.168.1.3:~/comms-gs/test_coords.txt
+
+rsync -ave ssh  ~/SeniorProjects/comms-gs/SampleVideo.mp4 ground-station@192.168.1.3:~/comms-gs/sample_video.mp4
+
+rsync -ave ssh ~/SeniorProjects/comms-gs/sample_photo.jpg ground-station@192.168.1.3:~/comms-gs/sample_photo.jpg
