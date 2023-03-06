@@ -49,7 +49,7 @@ class mainWindow(QWidget):
         #self.videoFeed.start()
 
         # Start video player
-        self.videoPlayer = QMediaPlayer()
+        self.mediaPlayer = QMediaPlayer()
 
         # Initialize widgets --------------------------
 
@@ -59,14 +59,15 @@ class mainWindow(QWidget):
 
         # Video player widget (file playback)
         self.vidPlayer = QVideoWidget()
-        self.videoPlayer.setVideoOutput(self.vidPlayer)
+        self.mediaPlayer.setVideoOutput(self.vidPlayer)
         cwd = os.getcwd()
         self.vidFileWatch = QFileSystemWatcher([cwd])
         self.vidNumber = 1
         self.vidFileWatch.directoryChanged.connect(self.playVid)
-        self.videoPlayer.mediaStatusChanged.connect(self.playVid)
+        self.mediaPlayer.mediaStatusChanged.connect(self.playVid)
 
         self.imDisp = QLabel()
+        self.imNum = 1
         #pixmap = QPixmap('SAILR logo.jpg')
         # pixmap = QPixmap("SAILR logo extended.jpg")
         pixmap = QPixmap("SAILR-Logo-extended.jpg")
@@ -75,6 +76,8 @@ class mainWindow(QWidget):
         #self.scrollAreaImage.setWidgetResizable(True)
         self.scrollAreaImage.setFixedHeight(380)
         self.scrollAreaImage.setWidget(self.imDisp)
+        self.imFileWatch = QFileSystemWatcher([cwd])
+        self.imFileWatch.directoryChanged.connect(self.newIm)
 
         self.priorCommands = QLabel()
         self.scrollArea = QScrollArea()
@@ -172,10 +175,16 @@ class mainWindow(QWidget):
     def playVid(self):
         # Function to play video when file is added to system or last video stops playing
         if os.path.isfile("video"+str(self.vidNumber)+".mp4"):
-            if (self.videoPlayer.mediaStatus() == QMediaPlayer.MediaStatus.EndOfMedia) or (self.videoPlayer.mediaStatus() == QMediaPlayer.MediaStatus.NoMedia):
-                self.videoPlayer.setSource(QUrl.fromLocalFile("video"+str(self.vidNumber)+".mp4"))
-                self.videoPlayer.play()
+            if (self.mediaPlayer.mediaStatus() == QMediaPlayer.MediaStatus.EndOfMedia) or (self.mediaPlayer.mediaStatus() == QMediaPlayer.MediaStatus.NoMedia):
+                self.mediaPlayer.setSource(QUrl.fromLocalFile("video"+str(self.vidNumber)+".mp4"))
+                self.mediaPlayer.play()
                 self.vidNumber += 1
+
+    def newIm(self):
+        if os.path.isfile("image"+str(self.imNum)+".jpg"):
+            pixmap = QPixmap("image" + str(self.imNum) + ".jpg")
+            self.imDisp.setPixmap(pixmap)
+            self.imNum += 1
 
     def imUpdate(self, image):
         # Set pixelmap of vidFeed widget to display image
