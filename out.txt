@@ -1,9 +1,0 @@
-1, mode, manual, translate, 10, 15:07:35
-2, mode, manual, LOI, 15, 25, 15:07:51
-3, mode, manual, translate, -5, 15:08:05
-4, mode, manual, rotate, -25, 15:08:16
-5, mode, manual, rotate, 25, 15:08:24
-6, mode, autonomous, 15:08:31
-7, mode, manual, 15:08:35
-8, stop, 15:08:44
-9, start, 15:08:46

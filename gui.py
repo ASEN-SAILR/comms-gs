@@ -68,7 +68,8 @@ class mainWindow(QWidget):
 
         self.imDisp = QLabel()
         #pixmap = QPixmap('SAILR logo.jpg')
-        pixmap = QPixmap("SAILR logo extended.jpg")
+        # pixmap = QPixmap("SAILR logo extended.jpg")
+        pixmap = QPixmap("SAILR-Logo-extended.jpg")
         self.imDisp.setPixmap(pixmap)
         self.scrollAreaImage = QScrollArea()
         #self.scrollAreaImage.setWidgetResizable(True)
@@ -203,7 +204,7 @@ class mainWindow(QWidget):
             
             self.callSync("out.txt")
 
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
 
         elif self.controlMode == "autonomous":
@@ -225,7 +226,7 @@ class mainWindow(QWidget):
 
             self.callSync("out.txt")
 
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
 
 
