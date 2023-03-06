@@ -22,12 +22,13 @@ class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
 
+
         # R-sync info
-        self.system_password = 'asen4018'
-        self.sender_path = '/root/comms-gs/out.txt'
-        self.receiver_ip = '192.168.56.102'
-        self.receiver_path = self.receiver_ip +':/root/comms-gs/out.txt'
-        self.commandString = "sshpass -p '" + self.system_password+"' rsync -ave ssh " + self.sender_path + " " + self.receiver_path
+        self.system_password = 'asen-sailr'
+        self.ground_station_path = '~/comms-gs/'
+        self.on_board_computer_ip = '169.254.179.9'
+        self.on_board_computer_path = 'sailr@' + self.on_board_computer_ip + ':~/SeniorProjects/comms-gs/'
+        self.commandStringStem = "sshpass -p '" + self.system_password+"' rsync -ave ssh "
 
         #Open files and clear contents
         self.outTxt = open("out.txt",'w')
@@ -67,7 +68,7 @@ class mainWindow(QWidget):
 
         self.imDisp = QLabel()
         #pixmap = QPixmap('SAILR logo.jpg')
-        pixmap = QPixmap('SAILR logo extended.jpg')
+        pixmap = QPixmap("SAILR logo extended.jpg")
         self.imDisp.setPixmap(pixmap)
         self.scrollAreaImage = QScrollArea()
         #self.scrollAreaImage.setWidgetResizable(True)
@@ -163,8 +164,9 @@ class mainWindow(QWidget):
 
         self.setLayout(self.layout)
 
-    def callSync(self):
-        subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+    def callSync(self, fileName):
+        print(self.commandStringStem + self.ground_station_path + fileName + " " + self.on_board_computer_path + fileName)
+        os.system(self.commandStringStem + self.ground_station_path + fileName + " " + self.on_board_computer_path + fileName)
 
     def playVid(self):
         # Function to play video when file is added to system or last video stops playing
@@ -198,7 +200,9 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system(self.commandString)
+            
+            self.callSync("out.txt")
+
             subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
 
@@ -218,7 +222,9 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system(self.commandString)
+
+            self.callSync("out.txt")
+
             subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
 
@@ -248,8 +254,10 @@ class mainWindow(QWidget):
                 self.outTxt = open("out.txt",'a')
                 self.outTxt.write(outString)
                 self.outTxt.close()
-                #os.system(self.commandString)
-                subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+
+                self.callSync("out.txt")
+
+                # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
         else:
             self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
@@ -275,8 +283,10 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system(self.commandString)
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            
+            self.callSync("out.txt")
+
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
 
         else:
@@ -305,8 +315,10 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system(self.commandString)
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            
+            self.callSync("out.txt")
+
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
         else:
             if self.controlMode != "manual":
@@ -334,8 +346,10 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system(self.commandString)
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            
+            self.callSync("out.txt")
+
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
 
         else:
@@ -364,8 +378,10 @@ class mainWindow(QWidget):
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
-            #os.system(self.commandString)
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            
+            self.callSync("out.txt")
+
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
         else:
             if self.controlMode != "manual":
@@ -397,8 +413,9 @@ class mainWindow(QWidget):
             self.outTxt.write(outString)
             self.outTxt.close()
 
-            #os.system(self.commandString)
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            self.callSync("out.txt")
+
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
         elif self.isStop == 1:
             self.console.setText("EMERGENCY STOP CANCELED")
@@ -418,8 +435,9 @@ class mainWindow(QWidget):
             self.outTxt.write(outString)
             self.outTxt.close()
 
-            #os.system(self.commandString)
-            subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+            self.callSync("out.txt")
+
+            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
     
     def changePosition(self):
         locationTxt = open("roverLocation.txt",'r')
