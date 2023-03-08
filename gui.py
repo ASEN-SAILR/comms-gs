@@ -18,6 +18,12 @@ import os
 
 import subprocess
 
+import socket
+
+import pickle
+
+import struct
+
 class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
@@ -54,17 +60,17 @@ class mainWindow(QWidget):
         # Initialize widgets --------------------------
 
         # Video feed widget (live feed)
-        #self.vidFeed = QLabel()
-        #self.videoFeed.imageUpdate.connect(self.imUpdate)
+        self.vidFeed = QLabel()
+        self.videoFeed.imageUpdate.connect(self.imUpdate)
 
         # Video player widget (file playback)
-        self.vidPlayer = QVideoWidget()
-        self.mediaPlayer.setVideoOutput(self.vidPlayer)
+        # self.vidPlayer = QVideoWidget()
+        # self.mediaPlayer.setVideoOutput(self.vidPlayer)
         cwd = os.getcwd()
-        self.vidFileWatch = QFileSystemWatcher([cwd])
-        self.vidNumber = 1
-        self.vidFileWatch.directoryChanged.connect(self.playVid)
-        self.mediaPlayer.mediaStatusChanged.connect(self.playVid)
+        # self.vidFileWatch = QFileSystemWatcher([cwd])
+        # self.vidNumber = 1
+        # self.vidFileWatch.directoryChanged.connect(self.playVid)
+        # self.mediaPlayer.mediaStatusChanged.connect(self.playVid)
 
         self.imDisp = QLabel()
         self.imNum = 1
@@ -134,7 +140,7 @@ class mainWindow(QWidget):
         #self.layout.addWidget(self.vidFeed, 0, 0, 3, 2)
 
         # For video file player
-        self.layout.addWidget(self.vidPlayer, 0, 0, 2, 4)
+        self.layout.addWidget(self.vidFeed, 0, 0, 2, 4)
 
         self.layout.addWidget(self.scrollAreaImage, 2, 0, 1, 4)
 
@@ -455,11 +461,74 @@ class mainWindow(QWidget):
         if len(roverLoc) == 2:
             self.curPosition.setText("Current Position: " + roverLoc[0] + "\N{DEGREE SIGN}N, " + roverLoc[1] + "\N{DEGREE SIGN}E")
 
-class liveVideoClient():
-    import cv2
-    import socket
-    import pickle
-    import struct
+# class liveVideoClient():
+#     import cv2
+#     import socket
+#     import pickle
+#     import struct
+
+#     # Create a socket object
+#     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#     host_ip = '127.0.1.1'  # replace with the server IP address
+#     port = 9999
+#     socket_address = (host_ip, port)
+
+#     # Make signal for updating image
+#     imageUpdate = pyqtSignal(QImage)
+
+#     # Connect to the server
+#     client_socket.connect(socket_address)
+
+#     # Receive the video dimensions from the server
+#     frame_width = struct.unpack("I", client_socket.recv(4))[0]
+#     frame_height = struct.unpack("I", client_socket.recv(4))[0]
+
+#     # Create a window to display the video
+#     cv2.namedWindow('Live Streaming', cv2.WINDOW_NORMAL)
+#     cv2.resizeWindow('Live Streaming', frame_width, frame_height)
+
+#     # Start receiving the video
+#     while True:
+#         # Receive the frame size from the server
+#         data_size = struct.unpack("I", client_socket.recv(4))[0]
+
+#         # Receive the frame from the server
+#         data = b""
+#         while len(data) < data_size:
+#             packet = client_socket.recv(data_size - len(data))
+#             if not packet:
+#                 break
+#             data += packet
+
+#         # Convert the byte string to a frame
+#         frame = pickle.loads(data)
+
+#         # Display the frame in the window
+#         # cv2.imshow('Live Streaming', frame)
+
+#         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+#         # Horizontally flip image
+#         flippedIm = cv2.flip(image,1)
+
+#         # Convert image to PyQt format
+#         qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+
+#         imageUpdate.emit(qtImage)
+
+#         # Exit on ESC
+#         if cv2.waitKey(1) == 27:
+#             break
+
+#     # Clean up
+#     #cv2.destroyAllWindows()
+#     client_socket.close()
+
+class videoFeed(QThread):
+    # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
+    
+    # Create signal for when image in video feed should be updated
+    imageUpdate = pyqtSignal(QImage)
 
     # Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -474,43 +543,6 @@ class liveVideoClient():
     frame_width = struct.unpack("I", client_socket.recv(4))[0]
     frame_height = struct.unpack("I", client_socket.recv(4))[0]
 
-    # Create a window to display the video
-    cv2.namedWindow('Live Streaming', cv2.WINDOW_NORMAL)
-    cv2.resizeWindow('Live Streaming', frame_width, frame_height)
-
-    # Start receiving the video
-    while True:
-    # Receive the frame size from the server
-    data_size = struct.unpack("I", client_socket.recv(4))[0]
-
-    # Receive the frame from the server
-    data = b""
-    while len(data) < data_size:
-        packet = client_socket.recv(data_size - len(data))
-        if not packet:
-            break
-        data += packet
-
-    # Convert the byte string to a frame
-    frame = pickle.loads(data)
-
-    # Display the frame in the window
-    cv2.imshow('Live Streaming', frame)
-
-    # Exit on ESC
-    if cv2.waitKey(1) == 27:
-        break
-
-    # Clean up
-    cv2.destroyAllWindows()
-    client_socket.close()
-
-class videoFeed(QThread):
-    # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
-    
-    # Create signal for when image in video feed should be updated
-    imageUpdate = pyqtSignal(QImage)
-
     # Method to start video feed
     def run(self):
         
@@ -519,25 +551,52 @@ class videoFeed(QThread):
 
         # Initialize video capture of default device
         
-        vidCap = cv2.VideoCapture(0)
+        #vidCap = cv2.VideoCapture(0)
         while self.videoActive:
             # isFrame bool for presence of frame, frame contains current frame
-            isFrame , frame = vidCap.read()
-            if isFrame:
-                # convert frame color space from BGR to RGB
-                image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # isFrame , frame = vidCap.read()
+            # if isFrame:
+            #     # convert frame color space from BGR to RGB
+            #     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-                # Horizontally flip image
-                flippedIm = cv2.flip(image,1)
+            #     # Horizontally flip image
+            #     flippedIm = cv2.flip(image,1)
 
-                # Convert image to PyQt format
-                qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+            #     # Convert image to PyQt format
+            #     qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
 
-                # Scale qtImage to desired size
-                # pic = qtImage.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
+            #     # Scale qtImage to desired size
+            #     # pic = qtImage.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
 
-                # send signal with image (pic/qtImage)
-                self.imageUpdate.emit(qtImage)
+            #     # send signal with image (pic/qtImage)
+            #     self.imageUpdate.emit(qtImage)
+
+                    # Receive the frame size from the server
+            data_size = struct.unpack("I", self.client_socket.recv(4))[0]
+
+            # Receive the frame from the server
+            data = b""
+            while len(data) < data_size:
+                packet = self.client_socket.recv(data_size - len(data))
+                if not packet:
+                    break
+                data += packet
+
+            # Convert the byte string to a frame
+            frame = pickle.loads(data)
+
+            # Display the frame in the window
+            # cv2.imshow('Live Streaming', frame)
+
+            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Horizontally flip image
+            flippedIm = cv2.flip(image,1)
+
+            # Convert image to PyQt format
+            qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+
+            self.imageUpdate.emit(qtImage)
 
     # Method to stop video feed                
     def stop(self):
