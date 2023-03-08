@@ -51,11 +51,11 @@ class mainWindow(QWidget):
         self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: PT Serif};")
 
         # Start video feed
-        #self.videoFeed = videoFeed()
-        #self.videoFeed.start()
+        self.videoFeed = videoFeed()
+        self.videoFeed.start()
 
         # Start video player
-        self.mediaPlayer = QMediaPlayer()
+        #self.mediaPlayer = QMediaPlayer()
 
         # Initialize widgets --------------------------
 
@@ -532,7 +532,7 @@ class videoFeed(QThread):
 
     # Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host_ip = '127.0.1.1'  # replace with the server IP address
+    host_ip = '10.203.178.120'  # replace with the server IP address
     port = 9999
     socket_address = (host_ip, port)
 
