@@ -61,6 +61,8 @@ class mainWindow(QWidget):
 
         # Video feed widget (live feed)
         self.vidFeed = QLabel()
+        self.vidFeed.setFixedHeight(360)
+        self.vidFeed.setFixedWidth(460)
         self.videoFeed.imageUpdate.connect(self.imUpdate)
 
         # Video player widget (file playback)
