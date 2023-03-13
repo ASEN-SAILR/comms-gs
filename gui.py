@@ -84,7 +84,7 @@ class mainWindow(QWidget):
         #self.scrollAreaImage.setWidgetResizable(True)
         self.scrollAreaImage.setFixedHeight(380)
         self.scrollAreaImage.setWidget(self.imDisp)
-        self.imFileWatch = QFileSystemWatcher([cwd])
+        self.imFileWatch = QFileSystemWatcher([cwd+"/images"])
         self.imFileWatch.directoryChanged.connect(self.newIm)
 
         self.priorCommands = QLabel()
