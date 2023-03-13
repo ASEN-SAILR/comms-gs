@@ -136,6 +136,10 @@ class mainWindow(QWidget):
         self.pingButton = QPushButton("PING")
         self.pingButton.clicked.connect(self.pingFunc)
 
+        self.startFeedButton = QPushButton("Start vid")
+        self.vidFeedOn = 0
+        self.startFeedButton.clicked.connect(self.startFeed)
+
         self.console = QLabel(" ")
 
         # Set layout
@@ -171,13 +175,15 @@ class mainWindow(QWidget):
 
         self.layout.addWidget(self.rightW, 4, 4)
 
-        self.layout.addWidget(self.stopButton, 5, 0, 1, 2)
+        self.layout.addWidget(self.stopButton, 5, 0, 1, 3)
 
-        self.layout.addWidget(self.curPosition, 5, 2, 1, 2)
+        self.layout.addWidget(self.curPosition, 5, 3, 1, 2)
 
-        self.layout.addWidget(self.pingButton, 5, 4, 1, 1)
+        self.layout.addWidget(self.pingButton, 6, 0, 1, 3)
 
-        self.layout.addWidget(self.console, 6, 0, 1, 5)
+        self.layout.addWidget(self.startFeedButton, 6, 3, 1, 2)
+
+        self.layout.addWidget(self.console, 7, 0, 1, 5)
 
         self.setLayout(self.layout)
 
@@ -475,6 +481,18 @@ class mainWindow(QWidget):
             self.console.setText("Ping unsuccessful, no connection detected")
         elif response == True:
             self.console.setText("Ping successful, connection detected")
+
+    def startFeed(self):
+        if self.vidFeedOn == 0:
+            self.videoFeed.start()
+            self.console.setText("Video feed started")
+            self.startFeedButton.setText("Stop vid")
+            self.vidFeedOn = 1
+        elif self.vidFeedOn == 1:
+            self.videoFeed.stop()
+            self.console.setText("Video feed stopped")
+            self.startFeedButton.setText("Start vid")
+            self.vidFeedOn = 0
 
 # class liveVideoClient():
 #     import cv2
