@@ -133,6 +133,9 @@ class mainWindow(QWidget):
         self.fileWatch.fileChanged.connect(self.changePosition)
         # add file manager and signal
 
+        self.pingButton = QPushButton("PING")
+        self.pingButton.clicked.connect(self.pingFunc)
+
         self.console = QLabel(" ")
 
         # Set layout
@@ -168,9 +171,11 @@ class mainWindow(QWidget):
 
         self.layout.addWidget(self.rightW, 4, 4)
 
-        self.layout.addWidget(self.stopButton, 5, 0, 1, 3)
+        self.layout.addWidget(self.stopButton, 5, 0, 1, 2)
 
-        self.layout.addWidget(self.curPosition, 5, 3, 1, 2)
+        self.layout.addWidget(self.curPosition, 5, 2, 1, 2)
+
+        self.layout.addWidget(self.pingButton, 5, 4, 1, 1)
 
         self.layout.addWidget(self.console, 6, 0, 1, 5)
 
@@ -462,6 +467,14 @@ class mainWindow(QWidget):
         roverLoc = locationTxt.read().split(',')
         if len(roverLoc) == 2:
             self.curPosition.setText("Current Position: " + roverLoc[0] + "\N{DEGREE SIGN}N, " + roverLoc[1] + "\N{DEGREE SIGN}E")
+
+    def pingFunc(self):
+        # response = os command
+        response = False
+        if response == False:
+            self.console.setText("Ping unsuccessful, no connection detected")
+        elif response == True:
+            self.console.setText("Ping successful, connection detected")
 
 # class liveVideoClient():
 #     import cv2
