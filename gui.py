@@ -24,6 +24,8 @@ import pickle
 
 import struct
 
+from pythonping import ping
+
 class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
@@ -32,8 +34,11 @@ class mainWindow(QWidget):
         # R-sync info
         self.system_password = 'asen-sailr'
         self.ground_station_path = '~/comms-gs/'
-        self.on_board_computer_ip = '169.254.179.9'
-        self.on_board_computer_path = 'sailr@' + self.on_board_computer_ip + ':~/SeniorProjects/comms-gs/'
+        # self.on_board_computer_ip = '10.203.178.120'
+        self.on_board_computer_ip = '192.168.1.2'
+        # self.on_board_computer_ip = '169.254.179.9'
+        self.obc_user = 'sailr'
+        self.on_board_computer_path = self.obc_user+'@' + self.on_board_computer_ip + ':~/SeniorProjects/automation/'
         self.commandStringStem = "sshpass -p '" + self.system_password+"' rsync -ave ssh "
 
         #Open files and clear contents
@@ -84,7 +89,7 @@ class mainWindow(QWidget):
         #self.scrollAreaImage.setWidgetResizable(True)
         self.scrollAreaImage.setFixedHeight(380)
         self.scrollAreaImage.setWidget(self.imDisp)
-        self.imFileWatch = QFileSystemWatcher([cwd+"/images"])
+        self.imFileWatch = QFileSystemWatcher([cwd+"images"])
         self.imFileWatch.directoryChanged.connect(self.newIm)
 
         self.priorCommands = QLabel()
@@ -136,9 +141,9 @@ class mainWindow(QWidget):
         self.pingButton = QPushButton("PING")
         self.pingButton.clicked.connect(self.pingFunc)
 
-        self.startFeedButton = QPushButton("Start vid")
-        self.vidFeedOn = 0
-        self.startFeedButton.clicked.connect(self.startFeed)
+        # self.startFeedButton = QPushButton("Start vid")
+        # self.vidFeedOn = 0
+        # self.startFeedButton.clicked.connect(self.startFeed)
 
         self.console = QLabel(" ")
 
@@ -181,7 +186,7 @@ class mainWindow(QWidget):
 
         self.layout.addWidget(self.pingButton, 6, 0, 1, 3)
 
-        self.layout.addWidget(self.startFeedButton, 6, 3, 1, 2)
+        # self.layout.addWidget(self.startFeedButton, 6, 3, 1, 2)
 
         self.layout.addWidget(self.console, 7, 0, 1, 5)
 
@@ -200,10 +205,13 @@ class mainWindow(QWidget):
                 self.vidNumber += 1
 
     def newIm(self):
-        if os.path.isfile("image"+str(self.imNum)+".jpg"):
-            pixmap = QPixmap("image" + str(self.imNum) + ".jpg")
+        # if os.path.isfile("image"+str(self.imNum)+".jpg"):
+        #     pixmap = QPixmap("image" + str(self.imNum) + ".jpg")
+        #     self.imDisp.setPixmap(pixmap)
+        #     self.imNum += 1
+        if os.path.isfile("pano.jpg"):
+            pixmap = QPixmap("pano.jpg")
             self.imDisp.setPixmap(pixmap)
-            self.imNum += 1
 
     def imUpdate(self, image):
         # Set pixelmap of vidFeed widget to display image
@@ -224,7 +232,7 @@ class mainWindow(QWidget):
             t = time.localtime()
             current_time = time.strftime("%H:%M:%S", t)
 
-            outString = str(self.commandNum) + ", mode, autonomous, " + current_time + "\n"
+            outString = str(self.commandNum) + ", autonomous, " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
@@ -246,7 +254,7 @@ class mainWindow(QWidget):
             t = time.localtime()
             current_time = time.strftime("%H:%M:%S", t)
 
-            outString = str(self.commandNum) + ", mode, manual, " + current_time + "\n"
+            outString = str(self.commandNum) + ", manual, " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
@@ -278,7 +286,7 @@ class mainWindow(QWidget):
                 current_time = time.strftime("%H:%M:%S", t)
 
                 # Write output to file
-                outString = str(self.commandNum) + ", mode, " + self.controlMode + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
+                outString = str(self.commandNum) + ", " + self.controlMode + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
 
                 self.outTxt = open("out.txt",'a')
                 self.outTxt.write(outString)
@@ -307,7 +315,7 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", mode, manual, translate, " + self.forwardW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", manual, translate, " + self.forwardW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
@@ -339,7 +347,7 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", mode, manual, translate, -" + self.backwardW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", manual, translate, -" + self.backwardW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
@@ -370,7 +378,7 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", mode, manual, rotate, -" + self.leftW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", manual, rotate, -" + self.leftW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
@@ -402,7 +410,7 @@ class mainWindow(QWidget):
             current_time = time.strftime("%H:%M:%S", t)
 
             # Write output to file
-            outString = str(self.commandNum) + ", mode, manual, rotate, " + self.rightW.text() + ", " + current_time + "\n"
+            outString = str(self.commandNum) + ", manual, rotate, " + self.rightW.text() + ", " + current_time + "\n"
 
             self.outTxt = open("out.txt",'a')
             self.outTxt.write(outString)
@@ -475,87 +483,27 @@ class mainWindow(QWidget):
             self.curPosition.setText("Current Position: " + roverLoc[0] + "\N{DEGREE SIGN}N, " + roverLoc[1] + "\N{DEGREE SIGN}E")
 
     def pingFunc(self):
-        # response = os command
-        response = False
-        if response == False:
-            self.console.setText("Ping unsuccessful, no connection detected")
-        elif response == True:
-            self.console.setText("Ping successful, connection detected")
+        response = os.system('ping '+self.on_board_computer_ip+' -c 3 -W 1')
+        print(response)
+        if response == 0:
+            self.console.setText("Connected to OBC")
+        else:
+            self.console.setText("NOT Connected to OBC")
 
-    def startFeed(self):
-        if self.vidFeedOn == 0:
-            self.videoFeed.start()
-            self.console.setText("Video feed started")
-            self.startFeedButton.setText("Stop vid")
-            self.vidFeedOn = 1
-        elif self.vidFeedOn == 1:
-            self.videoFeed.stop()
-            self.console.setText("Video feed stopped")
-            self.startFeedButton.setText("Start vid")
-            self.vidFeedOn = 0
+    # def startFeed(self):
+    #     if self.vidFeedOn == 0:
+    #         self.videoFeed = videoFeed(self.on_board_computer_ip)
+    #         self.videoFeed.run()
+    #         self.videoFeed.imageUpdate.connect(self.imUpdate)
+    #         self.console.setText("Video feed started")
+    #         self.startFeedButton.setText("Stop vid")
+    #         self.vidFeedOn = 1
+    #     elif self.vidFeedOn == 1:
+            # self.videoFeed.stop()
+            # self.console.setText("Video feed stopped")
+            # self.startFeedButton.setText("Start vid")
+            # self.vidFeedOn = 0
 
-# class liveVideoClient():
-#     import cv2
-#     import socket
-#     import pickle
-#     import struct
-
-#     # Create a socket object
-#     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     host_ip = '127.0.1.1'  # replace with the server IP address
-#     port = 9999
-#     socket_address = (host_ip, port)
-
-#     # Make signal for updating image
-#     imageUpdate = pyqtSignal(QImage)
-
-#     # Connect to the server
-#     client_socket.connect(socket_address)
-
-#     # Receive the video dimensions from the server
-#     frame_width = struct.unpack("I", client_socket.recv(4))[0]
-#     frame_height = struct.unpack("I", client_socket.recv(4))[0]
-
-#     # Create a window to display the video
-#     cv2.namedWindow('Live Streaming', cv2.WINDOW_NORMAL)
-#     cv2.resizeWindow('Live Streaming', frame_width, frame_height)
-
-#     # Start receiving the video
-#     while True:
-#         # Receive the frame size from the server
-#         data_size = struct.unpack("I", client_socket.recv(4))[0]
-
-#         # Receive the frame from the server
-#         data = b""
-#         while len(data) < data_size:
-#             packet = client_socket.recv(data_size - len(data))
-#             if not packet:
-#                 break
-#             data += packet
-
-#         # Convert the byte string to a frame
-#         frame = pickle.loads(data)
-
-#         # Display the frame in the window
-#         # cv2.imshow('Live Streaming', frame)
-
-#         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-#         # Horizontally flip image
-#         flippedIm = cv2.flip(image,1)
-
-#         # Convert image to PyQt format
-#         qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
-
-#         imageUpdate.emit(qtImage)
-
-#         # Exit on ESC
-#         if cv2.waitKey(1) == 27:
-#             break
-
-#     # Clean up
-#     #cv2.destroyAllWindows()
-#     client_socket.close()
 
 class videoFeed(QThread):
     # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
@@ -565,7 +513,7 @@ class videoFeed(QThread):
 
     # Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host_ip = '169.254.179.9'  # replace with the server IP address
+    host_ip = '192.168.1.2'  # replace with the server IP address
     port = 9999
     socket_address = (host_ip, port)
 
