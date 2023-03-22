@@ -35,14 +35,14 @@ class mainWindow(QWidget):
         self.system_password = 'asen-sailr'
         self.ground_station_path = '~/comms-gs/'
         # self.on_board_computer_ip = '10.203.178.120'
-        self.on_board_computer_ip = '192.168.1.2'
-        # self.on_board_computer_ip = '169.254.179.9'
+        # self.on_board_computer_ip = '192.168.1.2'
+        self.on_board_computer_ip = '169.254.179.9'
         self.obc_user = 'sailr'
         self.on_board_computer_path = self.obc_user+'@' + self.on_board_computer_ip + ':~/SeniorProjects/automation/'
         self.commandStringStem = "sshpass -p '" + self.system_password+"' rsync -ave ssh "
 
         #Open files and clear contents
-        self.outTxt = open("out.txt",'w')
+        self.outTxt = open("commands.txt",'w')
         self.outTxt.truncate(0)
         self.outTxt.close()
 
@@ -56,8 +56,9 @@ class mainWindow(QWidget):
         self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: PT Serif};")
 
         # Start video feed
-        self.videoFeed = videoFeed()
-        self.videoFeed.start()
+        # uncomment
+        # self.videoFeed = videoFeed()
+        # self.videoFeed.start()
 
         # Start video player
         #self.mediaPlayer = QMediaPlayer()
@@ -65,10 +66,16 @@ class mainWindow(QWidget):
         # Initialize widgets --------------------------
 
         # Video feed widget (live feed)
+
+        # uncomment
         self.vidFeed = QLabel()
+
+
         #self.vidFeed.setFixedHeight(360)
         #self.vidFeed.setFixedWidth(460)
-        self.videoFeed.imageUpdate.connect(self.imUpdate)
+
+        #uncomment 
+        # self.videoFeed.imageUpdate.connect(self.imUpdate)
 
         # Video player widget (file playback)
         # self.vidPlayer = QVideoWidget()
@@ -134,7 +141,7 @@ class mainWindow(QWidget):
 
         self.curPosition = QLabel("Current Position:")
         self.fileWatch = QFileSystemWatcher()
-        self.fileWatch.addPath("roverLocation.txt")
+        self.fileWatch.addPath("telemetry.txt")
         self.fileWatch.fileChanged.connect(self.changePosition)
         # add file manager and signal
 
@@ -289,11 +296,11 @@ class mainWindow(QWidget):
                     # Write output to file
                     outString = str(self.commandNum) + ", " + self.controlMode + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
 
-                    self.outTxt = open("out.txt",'a')
+                    self.outTxt = open("commands.txt",'a')
                     self.outTxt.write(outString)
                     self.outTxt.close()
 
-                    self.callSync("out.txt")
+                    self.callSync("commands.txt")
 
                     # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -318,11 +325,11 @@ class mainWindow(QWidget):
             # Write output to file
             outString = str(self.commandNum) + ", manual, translate, " + self.forwardW.text() + ", " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
+            self.outTxt = open("commands.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
             
-            self.callSync("out.txt")
+            self.callSync("commands.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -350,11 +357,11 @@ class mainWindow(QWidget):
             # Write output to file
             outString = str(self.commandNum) + ", manual, translate, -" + self.backwardW.text() + ", " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
+            self.outTxt = open("commands.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
             
-            self.callSync("out.txt")
+            self.callSync("commands.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -381,11 +388,11 @@ class mainWindow(QWidget):
             # Write output to file
             outString = str(self.commandNum) + ", manual, rotate, -" + self.leftW.text() + ", " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
+            self.outTxt = open("commands.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
             
-            self.callSync("out.txt")
+            self.callSync("commands.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -413,11 +420,11 @@ class mainWindow(QWidget):
             # Write output to file
             outString = str(self.commandNum) + ", manual, rotate, " + self.rightW.text() + ", " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
+            self.outTxt = open("commands.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
             
-            self.callSync("out.txt")
+            self.callSync("commands.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -447,11 +454,11 @@ class mainWindow(QWidget):
             # Write output to file
             outString = str(self.commandNum) + ", stop, " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
+            self.outTxt = open("commands.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
 
-            self.callSync("out.txt")
+            self.callSync("commands.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -469,16 +476,16 @@ class mainWindow(QWidget):
             # Write output to file
             outString = str(self.commandNum) + ", start, " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
+            self.outTxt = open("commands.txt",'a')
             self.outTxt.write(outString)
             self.outTxt.close()
 
-            self.callSync("out.txt")
+            self.callSync("commands.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
     
     def changePosition(self):
-        locationTxt = open("roverLocation.txt",'r')
+        locationTxt = open("telemetry.txt",'r')
         roverLoc = locationTxt.read().split(',')
         if len(roverLoc) == 2:
             self.curPosition.setText("Current Position: " + roverLoc[0] + "\N{DEGREE SIGN}N, " + roverLoc[1] + "\N{DEGREE SIGN}E")
@@ -506,84 +513,84 @@ class mainWindow(QWidget):
             # self.vidFeedOn = 0
 
 
-class videoFeed(QThread):
-    # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
+# class videoFeed(QThread):
+#     # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
     
-    # Create signal for when image in video feed should be updated
-    imageUpdate = pyqtSignal(QImage)
+#     # Create signal for when image in video feed should be updated
+#     imageUpdate = pyqtSignal(QImage)
 
-    # Create a socket object
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host_ip = '192.168.1.2'  # replace with the server IP address
-    port = 9999
-    socket_address = (host_ip, port)
+#     # Create a socket object
+#     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#     host_ip = '192.168.1.2'  # replace with the server IP address
+#     port = 9999
+#     socket_address = (host_ip, port)
 
-    # Connect to the server
-    client_socket.connect(socket_address)
+#     # Connect to the server
+#     client_socket.connect(socket_address)
 
-    # Receive the video dimensions from the server
-    frame_width = struct.unpack("I", client_socket.recv(4))[0]
-    frame_height = struct.unpack("I", client_socket.recv(4))[0]
+#     # Receive the video dimensions from the server
+#     frame_width = struct.unpack("I", client_socket.recv(4))[0]
+#     frame_height = struct.unpack("I", client_socket.recv(4))[0]
 
-    # Method to start video feed
-    def run(self):
+#     # Method to start video feed
+#     def run(self):
         
-        # Boolean for if video active
-        self.videoActive = True
+#         # Boolean for if video active
+#         self.videoActive = True
 
-        # Initialize video capture of default device
+#         # Initialize video capture of default device
         
-        #vidCap = cv2.VideoCapture(0)
-        while self.videoActive:
-            # isFrame bool for presence of frame, frame contains current frame
-            # isFrame , frame = vidCap.read()
-            # if isFrame:
-            #     # convert frame color space from BGR to RGB
-            #     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#         #vidCap = cv2.VideoCapture(0)
+#         while self.videoActive:
+#             # isFrame bool for presence of frame, frame contains current frame
+#             # isFrame , frame = vidCap.read()
+#             # if isFrame:
+#             #     # convert frame color space from BGR to RGB
+#             #     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            #     # Horizontally flip image
-            #     flippedIm = cv2.flip(image,1)
+#             #     # Horizontally flip image
+#             #     flippedIm = cv2.flip(image,1)
 
-            #     # Convert image to PyQt format
-            #     qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+#             #     # Convert image to PyQt format
+#             #     qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
 
-            #     # Scale qtImage to desired size
-            #     # pic = qtImage.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
+#             #     # Scale qtImage to desired size
+#             #     # pic = qtImage.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
 
-            #     # send signal with image (pic/qtImage)
-            #     self.imageUpdate.emit(qtImage)
+#             #     # send signal with image (pic/qtImage)
+#             #     self.imageUpdate.emit(qtImage)
 
-                    # Receive the frame size from the server
-            data_size = struct.unpack("I", self.client_socket.recv(4))[0]
+#                     # Receive the frame size from the server
+#             data_size = struct.unpack("I", self.client_socket.recv(4))[0]
 
-            # Receive the frame from the server
-            data = b""
-            while len(data) < data_size:
-                packet = self.client_socket.recv(data_size - len(data))
-                if not packet:
-                    break
-                data += packet
+#             # Receive the frame from the server
+#             data = b""
+#             while len(data) < data_size:
+#                 packet = self.client_socket.recv(data_size - len(data))
+#                 if not packet:
+#                     break
+#                 data += packet
 
-            # Convert the byte string to a frame
-            frame = pickle.loads(data)
+#             # Convert the byte string to a frame
+#             frame = pickle.loads(data)
 
-            # Display the frame in the window
-            # cv2.imshow('Live Streaming', frame)
+#             # Display the frame in the window
+#             # cv2.imshow('Live Streaming', frame)
 
-            image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-            # Horizontally flip image
-            flippedIm = cv2.flip(image,1)
+#             # Horizontally flip image
+#             flippedIm = cv2.flip(image,1)
 
-            # Convert image to PyQt format
-            qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+#             # Convert image to PyQt format
+#             qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
 
-            self.imageUpdate.emit(qtImage)
+#             self.imageUpdate.emit(qtImage)
 
-    # Method to stop video feed                
-    def stop(self):
-        self.videoActive = False
-        self.quit()
+#     # Method to stop video feed                
+#     def stop(self):
+#         self.videoActive = False
+#         self.quit()
 
 app = QApplication(sys.argv)
 root = mainWindow()
