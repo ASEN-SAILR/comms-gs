@@ -26,6 +26,8 @@ import struct
 
 from pythonping import ping
 
+import threading
+
 class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
@@ -139,10 +141,13 @@ class mainWindow(QWidget):
         self.stopButton.clicked.connect(self.toggleStop)
         self.stopButton.setStyleSheet("background-color : red")
 
-        self.curPosition = QLabel("Current Position:")
-        self.fileWatch = QFileSystemWatcher()
-        self.fileWatch.addPath("telemetry.txt")
-        self.fileWatch.fileChanged.connect(self.changePosition)
+        # implement file watching
+        thread  = threading.Thread(target = self.changePosition,args = (self,)).start()
+
+        # self.curPosition = QLabel("Current Position:")
+        # self.fileWatch = QFileSystemWatcher()
+        # self.fileWatch.addPath("telemetry.txt")
+        # self.fileWatch.fileChanged.connect(self.changePosition)
         # add file manager and signal
 
         self.pingButton = QPushButton("PING")
@@ -485,9 +490,12 @@ class mainWindow(QWidget):
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
     
     def changePosition(self):
-        locationTxt = open("telemetry.txt",'r')
-        roverLoc = locationTxt.read().splitlines()[-1].split(', ')
-        self.curPosition.setText("Current Position: " + roverLoc[0] + " " + roverLoc[1] + " " + roverLoc[2])
+        while True:
+            locationTxt = open("telemetry.txt",'r')
+            roverLoc = locationTxt.read().splitlines()[-1].split(', ')
+            self.curPosition.setText("Current Position: " + roverLoc[0] + " " + roverLoc[1] + " " + roverLoc[2])
+            locationTxt.close()
+            time.sleep(2)
 
     def pingFunc(self):
         response = os.system('ping '+self.on_board_computer_ip+' -c 3 -W 1')
