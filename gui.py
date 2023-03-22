@@ -229,16 +229,16 @@ class mainWindow(QWidget):
             self.controlIndicator.setText("Control Mode: Autonomous")
             self.controlMode = "autonomous"
 
-            t = time.localtime()
-            current_time = time.strftime("%H:%M:%S", t)
+            # t = time.localtime()
+            # current_time = time.strftime("%H:%M:%S", t)
 
-            outString = str(self.commandNum) + ", autonomous, " + current_time + "\n"
+            # outString = str(self.commandNum) + ", autonomous, " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
-            self.outTxt.write(outString)
-            self.outTxt.close()
+            # self.outTxt = open("out.txt",'a')
+            # self.outTxt.write(outString)
+            # self.outTxt.close()
             
-            self.callSync("out.txt")
+            # self.callSync("out.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -251,16 +251,16 @@ class mainWindow(QWidget):
             self.controlIndicator.setText("Control Mode: Manual")
             self.controlMode = "manual"
 
-            t = time.localtime()
-            current_time = time.strftime("%H:%M:%S", t)
+            # t = time.localtime()
+            # current_time = time.strftime("%H:%M:%S", t)
 
-            outString = str(self.commandNum) + ", manual, " + current_time + "\n"
+            # outString = str(self.commandNum) + ", manual, " + current_time + "\n"
 
-            self.outTxt = open("out.txt",'a')
-            self.outTxt.write(outString)
-            self.outTxt.close()
+            # self.outTxt = open("out.txt",'a')
+            # self.outTxt.write(outString)
+            # self.outTxt.close()
 
-            self.callSync("out.txt")
+            # self.callSync("out.txt")
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
@@ -276,25 +276,26 @@ class mainWindow(QWidget):
                 #console.setText(u"LOI IGNORED: -90 " + u'≤' " Degrees North " + u'≤' + " , -180 " + u'≤' + " Degrees East "  + u'≤' )
                 self.console.setText(u"LOI IGNORED: -90 ≤ Degrees North ≤ , -180 ≤ Degrees East ≤ 180")
             else:
-                self.commandNum += 1
-            
-                self.console.setText("LOI ACCEPTED: " + self.degN.text() + " Degrees North, " + self.degE.text() + " Degrees East")
-                priorText = self.priorCommands.text()
-                self.priorCommands.setText(priorText + "\nLOI: " + self.degN.text() + u'\N{DEGREE SIGN}N ' + self.degE.text() + u'\N{DEGREE SIGN}E')
+                if self.controlMode == "autonomous":
+                    self.commandNum += 1
+                
+                    self.console.setText("LOI ACCEPTED: " + self.degN.text() + " Degrees North, " + self.degE.text() + " Degrees East")
+                    priorText = self.priorCommands.text()
+                    self.priorCommands.setText(priorText + "\nLOI: " + self.degN.text() + u'\N{DEGREE SIGN}N ' + self.degE.text() + u'\N{DEGREE SIGN}E')
 
-                t = time.localtime()
-                current_time = time.strftime("%H:%M:%S", t)
+                    t = time.localtime()
+                    current_time = time.strftime("%H:%M:%S", t)
 
-                # Write output to file
-                outString = str(self.commandNum) + ", " + self.controlMode + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
+                    # Write output to file
+                    outString = str(self.commandNum) + ", " + self.controlMode + ", LOI, " + self.degN.text() + ", " + self.degE.text() + ", " + current_time + "\n"
 
-                self.outTxt = open("out.txt",'a')
-                self.outTxt.write(outString)
-                self.outTxt.close()
+                    self.outTxt = open("out.txt",'a')
+                    self.outTxt.write(outString)
+                    self.outTxt.close()
 
-                self.callSync("out.txt")
+                    self.callSync("out.txt")
 
-                # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+                    # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
         else:
             self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
