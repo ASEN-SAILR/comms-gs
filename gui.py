@@ -486,9 +486,8 @@ class mainWindow(QWidget):
     
     def changePosition(self):
         locationTxt = open("telemetry.txt",'r')
-        roverLoc = locationTxt.read().split(',')
-        if len(roverLoc) == 2:
-            self.curPosition.setText("Current Position: " + roverLoc[0] + "\N{DEGREE SIGN}N, " + roverLoc[1] + "\N{DEGREE SIGN}E")
+        roverLoc = locationTxt.read().splitlines()[-1].split(', ')
+        self.curPosition.setText("Current Position: " + roverLoc[0] + " " + roverLoc[1] + " " + roverLoc[2])
 
     def pingFunc(self):
         response = os.system('ping '+self.on_board_computer_ip+' -c 3 -W 1')
