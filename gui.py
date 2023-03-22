@@ -142,9 +142,9 @@ class mainWindow(QWidget):
         self.stopButton.setStyleSheet("background-color : red")
 
         # implement file watching
-        thread  = threading.Thread(target = self.changePosition,args = (self,)).start()
+        thread  = threading.Thread(target = self.changePosition).start()
 
-        # self.curPosition = QLabel("Current Position:")
+        self.curPosition = QLabel("Current Position:")
         # self.fileWatch = QFileSystemWatcher()
         # self.fileWatch.addPath("telemetry.txt")
         # self.fileWatch.fileChanged.connect(self.changePosition)
@@ -495,9 +495,11 @@ class mainWindow(QWidget):
         while True:
             locationTxt = open("telemetry.txt",'r')
             roverLoc = locationTxt.read().splitlines()[-1].split(', ')
-            self.curPosition.setText("Current Position: " + roverLoc[0] + " " + roverLoc[1] + " " + roverLoc[2])
+            roverCoords = roverLoc[0].split(',')
+            self.curPosition.setText("Current Position: " + roverLoc[0] + " Time: " + roverLoc[1])
             locationTxt.close()
-            time.sleep(2)
+            time.sleep(1)
+        
 
     def pingFunc(self):
         response = os.system('ping '+self.on_board_computer_ip+' -c 3 -W 1')
