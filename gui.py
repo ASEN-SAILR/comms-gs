@@ -308,6 +308,8 @@ class mainWindow(QWidget):
                     self.callSync("commands.txt")
 
                     # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+                elif self.controlMode == "manual":
+                    self.console.setText("LOI IGNORED: Set control mode to autonomous")
 
         else:
             self.console.setText("LOI IGNORED: Invalid input given for either Degrees North, Degrees East or both")
