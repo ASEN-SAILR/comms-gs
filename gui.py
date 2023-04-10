@@ -28,6 +28,8 @@ from pythonping import ping
 
 import threading
 
+import datetime
+
 class mainWindow(QWidget):
     def __init__(self):
         super(mainWindow, self).__init__()
@@ -38,7 +40,9 @@ class mainWindow(QWidget):
         self.ground_station_path = '~/comms-gs/'
         # self.on_board_computer_ip = '10.203.178.120'
         # self.on_board_computer_ip = '192.168.1.2'
-        self.on_board_computer_ip = '169.254.179.9'
+        # self.on_board_computer_ip = '169.254.179.9'
+        self.on_board_computer_ip = '127.0.0.1'
+
         self.obc_user = 'sailr'
         self.on_board_computer_path = self.obc_user+'@' + self.on_board_computer_ip + ':~/SeniorProjects/automation/'
         self.commandStringStem = "sshpass -p '" + self.system_password+"' rsync -ave ssh "
@@ -58,12 +62,11 @@ class mainWindow(QWidget):
         self.setStyleSheet("QLabel, QLineEdit, QPushButton {font: PT Serif};")
 
         # Start video feed
-        # uncomment
-        # self.videoFeed = videoFeed()
-        # self.videoFeed.start()
+        self.videoFeed = videoFeed()
+        self.videoFeed.start()
 
         # Start video player
-        #self.mediaPlayer = QMediaPlayer()
+        self.mediaPlayer = QMediaPlayer()
 
         # Initialize widgets --------------------------
 
@@ -77,7 +80,7 @@ class mainWindow(QWidget):
         #self.vidFeed.setFixedWidth(460)
 
         #uncomment 
-        # self.videoFeed.imageUpdate.connect(self.imUpdate)
+        self.videoFeed.imageUpdate.connect(self.imUpdate)
 
         # Video player widget (file playback)
         # self.vidPlayer = QVideoWidget()
@@ -141,6 +144,11 @@ class mainWindow(QWidget):
         self.stopButton.clicked.connect(self.toggleStop)
         self.stopButton.setStyleSheet("background-color : red")
 
+        self.recordingButton = QPushButton("START RECORDING")
+        self.isRecording = False
+        self.recordingButton.clicked.connect(self.toggleRecording)
+        self.recordingButton.setStyleSheet("background-color : yellow")
+
         # implement file watching
         thread  = threading.Thread(target = self.changePosition).start()
 
@@ -197,6 +205,8 @@ class mainWindow(QWidget):
         self.layout.addWidget(self.curPosition, 5, 3, 1, 2)
 
         self.layout.addWidget(self.pingButton, 6, 0, 1, 3)
+
+        self.layout.addWidget(self.recordingButton, 6, 3, 1, 2)
 
         # self.layout.addWidget(self.startFeedButton, 6, 3, 1, 2)
 
@@ -491,6 +501,28 @@ class mainWindow(QWidget):
 
             # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
     
+
+    def toggleRecording(self):
+            
+            if self.isRecording:
+                self.console.setText("Stopped Recording")
+                # priorText = self.priorCommands.text()
+                # self.priorCommands.setText(priorText + "\nEmergency stop initiated")
+
+                self.recordingButton.setText("START RECORDING")
+                self.isRecording = False
+                self.videoFeed.record_toggle()
+
+            elif not self.isRecording:
+                self.console.setText("Started Recording")
+                # priorText = self.priorCommands.text()
+                # self.priorCommands.setText(priorText + "\nEmergency stop canceled")
+
+                self.recordingButton.setText("STOP RECORDING")
+                self.isRecording = True
+                self.videoFeed.record_toggle()
+
+
     def changePosition(self):
         while True:
             locationTxt = open("telemetry.txt",'r')
@@ -509,99 +541,158 @@ class mainWindow(QWidget):
         else:
             self.console.setText("NOT Connected to OBC")
 
-    # def startFeed(self):
-    #     if self.vidFeedOn == 0:
-    #         self.videoFeed = videoFeed(self.on_board_computer_ip)
-    #         self.videoFeed.run()
-    #         self.videoFeed.imageUpdate.connect(self.imUpdate)
-    #         self.console.setText("Video feed started")
-    #         self.startFeedButton.setText("Stop vid")
-    #         self.vidFeedOn = 1
-    #     elif self.vidFeedOn == 1:
-            # self.videoFeed.stop()
-            # self.console.setText("Video feed stopped")
-            # self.startFeedButton.setText("Start vid")
-            # self.vidFeedOn = 0
+    def startFeed(self):
+        if self.vidFeedOn == 0:
+            self.videoFeed = videoFeed(self.on_board_computer_ip)
+            self.videoFeed.run()
+            self.videoFeed.imageUpdate.connect(self.imUpdate)
+            self.console.setText("Video feed started")
+            self.startFeedButton.setText("Stop vid")
+            self.vidFeedOn = 1
+        elif self.vidFeedOn == 1:
+            self.videoFeed.stop()
+            self.console.setText("Video feed stopped")
+            self.startFeedButton.setText("Start vid")
+            self.vidFeedOn = 0
 
 
-# class videoFeed(QThread):
-#     # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
+class videoFeed(QThread):
+    # Using code from https://www.codepile.net/pile/ey9KAnxn and https://www.youtube.com/watch?v=dTDgbx-XelY
     
-#     # Create signal for when image in video feed should be updated
-#     imageUpdate = pyqtSignal(QImage)
+    # Create signal for when image in video feed should be updated
+    imageUpdate = pyqtSignal(QImage)
 
-#     # Create a socket object
-#     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     host_ip = '192.168.1.2'  # replace with the server IP address
-#     port = 9999
-#     socket_address = (host_ip, port)
+    # Create a socket object
+    # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    host = '127.0.2.1'  # replace with the server IP address
+    port = 9999
+    # socket_address = (host_ip, port)
+    connected = False
+    # frame_width = struct.unpack("I", client_socket.recv(4))[0]
+    # frame_height = struct.unpack("I", client_socket.recv(4))[0]
 
-#     # Connect to the server
-#     client_socket.connect(socket_address)
+    # Video recording setup
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    recording = False
+    out = None
+    filename = None
+    frame = None
 
-#     # Receive the video dimensions from the server
-#     frame_width = struct.unpack("I", client_socket.recv(4))[0]
-#     frame_height = struct.unpack("I", client_socket.recv(4))[0]
+    # Method to start video feed
+    def run(self):
 
-#     # Method to start video feed
-#     def run(self):
-        
-#         # Boolean for if video active
-#         self.videoActive = True
+        # Connect to the server
+        self.connect()
 
-#         # Initialize video capture of default device
-        
-#         #vidCap = cv2.VideoCapture(0)
-#         while self.videoActive:
-#             # isFrame bool for presence of frame, frame contains current frame
-#             # isFrame , frame = vidCap.read()
-#             # if isFrame:
-#             #     # convert frame color space from BGR to RGB
-#             #     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # Boolean for if video active
+        self.videoActive = True
 
-#             #     # Horizontally flip image
-#             #     flippedIm = cv2.flip(image,1)
+        # Initialize video capture of default device
 
-#             #     # Convert image to PyQt format
-#             #     qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+        #vidCap = cv2.VideoCapture(0)
+        while self.videoActive:
+            
+            # isFrame bool for presence of frame, frame contains current frame
+            # isFrame , frame = vidCap.read()
+            # if isFrame:
+            #     # convert frame color space from BGR to RGB
+            #     image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
-#             #     # Scale qtImage to desired size
-#             #     # pic = qtImage.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
+            #     # Horizontally flip image
+            #     flippedIm = cv2.flip(image,1)
 
-#             #     # send signal with image (pic/qtImage)
-#             #     self.imageUpdate.emit(qtImage)
+            #     # Convert image to PyQt format
+            #     qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
 
-#                     # Receive the frame size from the server
-#             data_size = struct.unpack("I", self.client_socket.recv(4))[0]
+            #     # Scale qtImage to desired size
+            #     # pic = qtImage.scaled(640, 480, Qt.AspectRatioMode.KeepAspectRatio)
 
-#             # Receive the frame from the server
-#             data = b""
-#             while len(data) < data_size:
-#                 packet = self.client_socket.recv(data_size - len(data))
-#                 if not packet:
-#                     break
-#                 data += packet
+            #     # send signal with image (pic/qtImage)
+            #     self.imageUpdate.emit(qtImage)
 
-#             # Convert the byte string to a frame
-#             frame = pickle.loads(data)
+                    # Receive the frame size from the server
+            try:
+                data_size = struct.unpack("I", self.socket.recv(4))[0]
+            except:
+                print(self.check_connection())
+                if not self.check_connection():
+                    print(f"Error receiving live video, retrying in 3 seconds...")
+                    self.socket.close()
+                    self.connect()
+                continue
 
-#             # Display the frame in the window
-#             # cv2.imshow('Live Streaming', frame)
+            # Receive the frame from the server
+            data = b""
+            while len(data) < data_size:
+                packet = self.socket.recv(data_size - len(data))
+                if not packet:
+                    break
+                data += packet
 
-#             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # Convert the byte string to a frame
+            self.frame = pickle.loads(data)
 
-#             # Horizontally flip image
-#             flippedIm = cv2.flip(image,1)
+            image = cv2.cvtColor(self.frame, cv2.COLOR_BGR2RGB)
 
-#             # Convert image to PyQt format
-#             qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+            # Record video frame
+            if self.recording:
+                self.out.write(self.frame)
 
-#             self.imageUpdate.emit(qtImage)
+            # Horizontally flip image
+            flippedIm = cv2.flip(image,1)
 
-#     # Method to stop video feed                
-#     def stop(self):
-#         self.videoActive = False
-#         self.quit()
+            # Convert image to PyQt format
+            qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
+
+            self.imageUpdate.emit(qtImage)
+
+
+        # TODO maintain connections
+
+    def connect(self):
+
+        while not self.connected:
+            try:
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                self.socket.connect((self.host, self.port))
+                self.connected = True
+                print(f"Connected to {self.host}:{self.port}")
+            except:
+                print(
+                    f"Error connecting to {self.host}:{self.port}, retrying in 3 seconds...")
+                time.sleep(3)
+
+    def check_connection(self,):
+        try:
+            self.socket.getpeername()
+            self.connected = True
+            return True
+        except:
+            self.connected = False
+            return False
+
+    # Method to stop video feed                
+    def stop(self):
+        if self.out is not None:
+            out.release()
+        self.socket.close()
+        self.videoActive = False
+        self.quit()
+
+    def record_toggle(self):
+        if not self.recording:
+            self.recording = True
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            self.filename = f"record_{timestamp}.mp4"
+            self.out = cv2.VideoWriter(self.filename, self.fourcc, 30.0, (self.frame.shape[1], self.frame.shape[0]))
+            print(f"Recording started. Saving to {self.filename}")
+        elif self.recording:
+            self.recording = False
+            self.out.release()
+            print(f"Recording stopped. Saved to {self.filename}")
+            self.filename = None
+
 
 app = QApplication(sys.argv)
 root = mainWindow()

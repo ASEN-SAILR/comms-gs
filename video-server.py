@@ -11,7 +11,6 @@ host_ip = '127.0.1.1'
 print('Host IP:', host_ip)
 port = 9999
 socket_address = (host_ip, port)
-
 # Bind the socket to a public host and a port
 server_socket.bind(socket_address)
 
