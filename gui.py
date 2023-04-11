@@ -40,8 +40,8 @@ class mainWindow(QWidget):
         self.ground_station_path = '~/comms-gs/'
         # self.on_board_computer_ip = '10.203.178.120'
         # self.on_board_computer_ip = '192.168.1.2'
-        # self.on_board_computer_ip = '169.254.179.9'
-        self.on_board_computer_ip = '127.0.0.1'
+        self.on_board_computer_ip = '169.254.179.9'
+        # self.on_board_computer_ip = '127.0.0.1'
 
         self.obc_user = 'sailr'
         self.on_board_computer_path = self.obc_user+'@' + self.on_board_computer_ip + ':~/SeniorProjects/automation/'
@@ -534,12 +534,12 @@ class mainWindow(QWidget):
         
 
     def pingFunc(self):
-        response = os.system('ping '+self.on_board_computer_ip+' -c 3 -W 1')
-        print(response)
-        if response == 0:
+        if 0 == os.system('ping '+self.on_board_computer_ip+' -c 1 -W 1'):
             self.console.setText("Connected to OBC")
+            return 1
         else:
             self.console.setText("NOT Connected to OBC")
+            return 0
 
     def startFeed(self):
         if self.vidFeedOn == 0:
@@ -564,7 +564,8 @@ class videoFeed(QThread):
 
     # Create a socket object
     # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = '127.0.2.1'  # replace with the server IP address
+    # host = '127.0.2.1'  # replace with the server IP address
+    host = '169.254.179.9'
     port = 9999
     # socket_address = (host_ip, port)
     connected = False
@@ -614,11 +615,11 @@ class videoFeed(QThread):
             try:
                 data_size = struct.unpack("I", self.socket.recv(4))[0]
             except:
-                print(self.check_connection())
-                if not self.check_connection():
-                    print(f"Error receiving live video, retrying in 3 seconds...")
-                    self.socket.close()
-                    self.connect()
+                # if not self.check_connection():
+                self.connected = False
+                print(f"Error receiving live video, retrying in 3 seconds...")
+                self.socket.close()
+                self.connect()
                 continue
 
             # Receive the frame from the server
@@ -666,6 +667,7 @@ class videoFeed(QThread):
     def check_connection(self,):
         try:
             self.socket.getpeername()
+            print(self.socket.getpeername())
             self.connected = True
             return True
         except:
@@ -685,7 +687,7 @@ class videoFeed(QThread):
             self.recording = True
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             self.filename = f"record_{timestamp}.mp4"
-            self.out = cv2.VideoWriter(self.filename, self.fourcc, 30.0, (self.frame.shape[1], self.frame.shape[0]))
+            self.out = cv2.VideoWriter(self.filename, self.fourcc, 20.0, (self.frame.shape[1], self.frame.shape[0]))
             print(f"Recording started. Saving to {self.filename}")
         elif self.recording:
             self.recording = False
