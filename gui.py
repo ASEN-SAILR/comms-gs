@@ -329,7 +329,7 @@ class mainWindow(QWidget):
 
     def moveForward(self):
 
-        if self.forwardW.text().isnumeric() and self.controlMode == "manual":
+        if self.forwardW.text().replace('.','',1).isnumeric() and self.controlMode == "manual":
             self.commandNum += 1            
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Forward " + self.forwardW.text() + " meters")
@@ -361,7 +361,7 @@ class mainWindow(QWidget):
 
     def moveBackward(self):
 
-        if self.backwardW.text().isnumeric() and self.controlMode == "manual":
+        if self.backwardW.text().replace('.','',1).isnumeric() and self.controlMode == "manual":
             self.commandNum += 1
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Backward " + self.backwardW.text() + " meters")
@@ -392,7 +392,7 @@ class mainWindow(QWidget):
 
     def turnLeft(self):
 
-        if self.leftW.text().isnumeric and self.controlMode == "manual":
+        if self.leftW.text().replace('.','',1).isnumeric and self.controlMode == "manual":
             self.commandNum += 1
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.leftW.text() + " degrees left")
@@ -424,7 +424,7 @@ class mainWindow(QWidget):
 
     def turnRight(self):
 
-        if self.rightW.text().isnumeric() and self.controlMode == "manual":
+        if self.rightW.text().replace('.','',1).isnumeric() and self.controlMode == "manual":
             self.commandNum += 1
 
             self.console.setText("MANUAL CONTROL ACCEPTED: Turn " + self.rightW.text() + " degrees right")
