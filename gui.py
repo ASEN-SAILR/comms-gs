@@ -110,10 +110,10 @@ class mainWindow(QWidget):
         self.scrollArea.setWidget(self.priorCommands)
 
         self.togControl = QPushButton("Toggle manual control")
-        self.controlMode = "manual"
+        self.controlMode = "autonomous"
         self.togControl.clicked.connect(self.toggleMode)
 
-        self.controlIndicator = QLabel("Control Mode: Manual")
+        self.controlIndicator = QLabel("Control Mode: Autonomous")
 
         self.degN = QLineEdit()
         self.degN.setPlaceholderText("Degrees north")
@@ -241,7 +241,7 @@ class mainWindow(QWidget):
 
     def toggleMode(self):
 
-        self.commandNum += 1
+        # self.commandNum += 1
 
         if self.controlMode == "manual":
             self.console.setText("CONTROL MODE SET TO AUTONOMOUS")
