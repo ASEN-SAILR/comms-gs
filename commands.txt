@@ -1,1 +1,1 @@
-1, manual, translate, 3, 19:46:50
+2, autonomous, LOI, 40.0093664, -105.2439658, 14:35:47

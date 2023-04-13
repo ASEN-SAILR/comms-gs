@@ -24,4 +24,4 @@ gs_video_path = gs_home_path+"videos"
 gs_image_path = gs_home_path+"images"
 comms = RoverComms(obcCommandPath,obcTelemPath,obcVideoPath,obcImagePath,gs_ssh_password,gs_ip,gs_telem_path,gs_video_path,gs_image_path)
 
-comms.liveVideoServer()
+comms.startLive()

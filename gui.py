@@ -1,34 +1,24 @@
 import sys
-
 from PyQt6.QtCore import *
-
 from PyQt6.QtWidgets import *
-
 from PyQt6.QtGui import *
-
 from PyQt6.QtMultimedia import *
-
 from PyQt6.QtMultimediaWidgets import *
-
 import cv2
-
 import time
-
 import os
-
 import subprocess
-
 import socket
-
 import pickle
-
 import struct
-
 from pythonping import ping
-
 import threading
-
 import datetime
+import folium
+import folium.plugins
+# from PyQt6.QtCore import QTimer
+# from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 
 class mainWindow(QWidget):
     def __init__(self):
@@ -40,17 +30,17 @@ class mainWindow(QWidget):
         self.ground_station_path = '~/comms-gs/'
         # self.on_board_computer_ip = '10.203.178.120'
         # self.on_board_computer_ip = '192.168.1.2'
-        self.on_board_computer_ip = '169.254.179.9'
-        # self.on_board_computer_ip = '127.0.0.1'
+        # self.on_board_computer_ip = '169.254.179.9'
+        self.on_board_computer_ip = '127.0.1.1'
 
         self.obc_user = 'sailr'
         self.on_board_computer_path = self.obc_user+'@' + self.on_board_computer_ip + ':~/SeniorProjects/automation/'
         self.commandStringStem = "sshpass -p '" + self.system_password+"' rsync -ave ssh "
 
         #Open files and clear contents
-        self.outTxt = open("commands.txt",'w')
-        self.outTxt.truncate(0)
-        self.outTxt.close()
+        # self.outTxt = open("commands.txt",'w')
+        # self.outTxt.truncate()
+        # self.outTxt.close()
 
         #Initialize command counter
         self.commandNum = 0
@@ -79,6 +69,9 @@ class mainWindow(QWidget):
         #self.vidFeed.setFixedHeight(360)
         #self.vidFeed.setFixedWidth(460)
 
+        # Added the map widget
+        self.map_widget = MapWidget()
+
         #uncomment 
         self.videoFeed.imageUpdate.connect(self.imUpdate)
 
@@ -94,14 +87,14 @@ class mainWindow(QWidget):
         self.imDisp = QLabel()
         self.imNum = 1
         #pixmap = QPixmap('SAILR logo.jpg')
-        # pixmap = QPixmap("SAILR logo extended.jpg")
         pixmap = QPixmap("SAILR-Logo-extended.jpg")
+        # pixmap = QPixmap("images/pano.jpg")
         self.imDisp.setPixmap(pixmap)
         self.scrollAreaImage = QScrollArea()
         #self.scrollAreaImage.setWidgetResizable(True)
         self.scrollAreaImage.setFixedHeight(380)
         self.scrollAreaImage.setWidget(self.imDisp)
-        self.imFileWatch = QFileSystemWatcher([cwd+"images"])
+        self.imFileWatch = QFileSystemWatcher([cwd+"/images"])
         self.imFileWatch.directoryChanged.connect(self.newIm)
 
         self.priorCommands = QLabel()
@@ -152,6 +145,8 @@ class mainWindow(QWidget):
         # implement file watching
         thread  = threading.Thread(target = self.changePosition).start()
 
+        thread_img  = threading.Thread(target = self.newIm).start()
+
         self.curPosition = QLabel("Current Position:")
         # self.fileWatch = QFileSystemWatcher()
         # self.fileWatch.addPath("telemetry.txt")
@@ -175,6 +170,8 @@ class mainWindow(QWidget):
 
         # For video file player
         self.layout.addWidget(self.vidFeed, 0, 0, 2, 4)
+
+        self.layout.addWidget(self.map_widget, 0, 2, 2, 2)
 
         self.layout.addWidget(self.scrollAreaImage, 2, 0, 1, 4)
 
@@ -231,9 +228,10 @@ class mainWindow(QWidget):
         #     pixmap = QPixmap("image" + str(self.imNum) + ".jpg")
         #     self.imDisp.setPixmap(pixmap)
         #     self.imNum += 1
-        if os.path.isfile("pano.jpg"):
-            pixmap = QPixmap("pano.jpg")
-            self.imDisp.setPixmap(pixmap)
+        while not os.path.isfile("pano.jpg"):
+            time.sleep(1)
+        pixmap = QPixmap("pano.jpg")
+        self.imDisp.setPixmap(pixmap)
 
     def imUpdate(self, image):
         # Set pixelmap of vidFeed widget to display image
@@ -564,8 +562,8 @@ class videoFeed(QThread):
 
     # Create a socket object
     # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # host = '127.0.2.1'  # replace with the server IP address
-    host = '169.254.179.9'
+    host = '127.0.1.1'  # replace with the server IP address
+    # host = '169.254.179.9'
     port = 9999
     # socket_address = (host_ip, port)
     connected = False
@@ -639,8 +637,11 @@ class videoFeed(QThread):
             if self.recording:
                 self.out.write(self.frame)
 
+            # make image smaller
+            resized_image = cv2.resize(image, (512, 384))
+
             # Horizontally flip image
-            flippedIm = cv2.flip(image,1)
+            flippedIm = cv2.flip(resized_image,1)
 
             # Convert image to PyQt format
             qtImage = QImage(flippedIm.data, flippedIm.shape[1], flippedIm.shape[0], QImage.Format.Format_RGB888)
@@ -651,8 +652,8 @@ class videoFeed(QThread):
         # TODO maintain connections
 
     def connect(self):
-
-        while not self.connected:
+        count = 0
+        while not self.connected and count < 3:
             try:
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -662,7 +663,15 @@ class videoFeed(QThread):
             except:
                 print(
                     f"Error connecting to {self.host}:{self.port}, retrying in 3 seconds...")
+                if self.recording:
+                    count += 1
                 time.sleep(3)
+            if count >= 3 and self.recording:
+                self.recording = False
+                self.out.release()
+                print("Recording has stopped after 3 tries to reconnect")
+                print(f"Recording stopped. Saved to {self.filename}")
+                self.filename = None
 
     def check_connection(self,):
         try:
@@ -695,6 +704,76 @@ class videoFeed(QThread):
             print(f"Recording stopped. Saved to {self.filename}")
             self.filename = None
 
+
+class MapWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        # Create a layout
+        layout = QVBoxLayout()
+
+        # Create a QWebEngineView widget and set the HTML map as its content
+        self.map_view = QWebEngineView()
+        self.map_view.setHtml(open('map.html').read())
+
+        # Add the map view to the layout
+        layout.addWidget(self.map_view)
+
+        # Set the layout for the widget
+        self.setLayout(layout)
+
+        # Create a timer to update the map periodically
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_map)
+        self.timer.start(20000)  # update every 20 seconds
+        # self.resize(400,200)
+
+    def update_map(self):
+        # Read in the GPS coordinates from the txt file
+        with open('telemetry.txt', 'r') as file:
+            lines = file.readlines()
+            gps_coordinates = [line.split(", ")[:2] for line in lines]
+
+        # Parse the latitude and longitude coordinates
+        latitudes = []
+        longitudes = []
+        for coordinate in gps_coordinates:
+            latitude, longitude = coordinate[0].strip().split(',')
+            latitudes.append(float(latitude))
+            longitudes.append(float(longitude))
+
+        # Compute the average latitude and longitude coordinates
+        avg_latitude = sum(latitudes) / len(latitudes)
+        avg_longitude = sum(longitudes) / len(longitudes)
+
+        # Set the center of the map to the average coordinate
+        map_center = [avg_latitude, avg_longitude]
+
+        # Create a map object
+        m = folium.Map(location=map_center, zoom_start=18)
+
+        # Create a polyline object using the latitude and longitude coordinates
+        coordinates = list(zip(latitudes, longitudes))
+        path = folium.plugins.AntPath(locations=coordinates, weight=5, color='blue', delay=1000, dash_array=[10, 100], reverse=True)
+
+        # Add the path to the map
+        path.add_to(m)
+
+        # Add a marker for the LOI coordinates, if available
+        with open('commands.txt', 'r') as file:
+            for line in file:
+                print(line)
+                fields = line.strip().split(', ')
+                if len(fields) == 6 and fields[2] == 'LOI':
+                    latitude, longitude = fields[3:5]
+                    folium.Marker(location=[float(latitude), float(longitude)], 
+                                icon=folium.Icon(color='red', icon='star')).add_to(m)
+
+        # Save the map as an HTML file
+        m.save('map.html')
+
+        # Update the HTML content of the map view
+        self.map_view.setHtml(open('map.html').read())
 
 app = QApplication(sys.argv)
 root = mainWindow()
