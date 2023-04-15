@@ -134,7 +134,7 @@ class mainWindow(QWidget):
 
         self.stopButton = QPushButton("STOP")
         self.isStop = 0
-        self.stopButton.clicked.connect(self.toggleStop)
+        self.stopButton.clicked.connect(self.stopFunc)
         self.stopButton.setStyleSheet("background-color : red")
 
         self.recordingButton = QPushButton("START RECORDING")
@@ -451,53 +451,72 @@ class mainWindow(QWidget):
         
         self.rightW.clear()
 
-    def toggleStop(self):
+    # def toggleStop(self):
 
-        self.commandNum += 1
+    #     self.commandNum += 1
         
-        if self.isStop == 0:
-            self.console.setText("EMERGENCY STOP INITIATED")
-            priorText = self.priorCommands.text()
-            self.priorCommands.setText(priorText + "\nEmergency stop initiated")
+    #     if self.isStop == 0:
+    #         self.console.setText("EMERGENCY STOP INITIATED")
+    #         priorText = self.priorCommands.text()
+    #         self.priorCommands.setText(priorText + "\nEmergency stop initiated")
 
-            self.stopButton.setText("START")
-            self.isStop = 1
+    #         self.stopButton.setText("START")
+    #         self.isStop = 1
 
-            t = time.localtime()
-            current_time = time.strftime("%H:%M:%S", t)
+    #         t = time.localtime()
+    #         current_time = time.strftime("%H:%M:%S", t)
 
-            # Write output to file
-            outString = str(self.commandNum) + ", stop, " + current_time + "\n"
+    #         # Write output to file
+    #         outString = str(self.commandNum) + ", stop, " + current_time + "\n"
 
-            self.outTxt = open("commands.txt",'a')
-            self.outTxt.write(outString)
-            self.outTxt.close()
+    #         self.outTxt = open("commands.txt",'a')
+    #         self.outTxt.write(outString)
+    #         self.outTxt.close()
 
-            self.callSync("commands.txt")
+    #         self.callSync("commands.txt")
 
-            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+    #         # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
 
-        elif self.isStop == 1:
-            self.console.setText("EMERGENCY STOP CANCELED")
-            priorText = self.priorCommands.text()
-            self.priorCommands.setText(priorText + "\nEmergency stop canceled")
+    #     elif self.isStop == 1:
+    #         self.console.setText("EMERGENCY STOP CANCELED")
+    #         priorText = self.priorCommands.text()
+    #         self.priorCommands.setText(priorText + "\nEmergency stop canceled")
 
-            self.stopButton.setText("STOP")
-            self.isStop = 0
+    #         self.stopButton.setText("STOP")
+    #         self.isStop = 0
 
-            t = time.localtime()
-            current_time = time.strftime("%H:%M:%S", t)
+    #         t = time.localtime()
+    #         current_time = time.strftime("%H:%M:%S", t)
 
-            # Write output to file
-            outString = str(self.commandNum) + ", start, " + current_time + "\n"
+    #         # Write output to file
+    #         outString = str(self.commandNum) + ", start, " + current_time + "\n"
 
-            self.outTxt = open("commands.txt",'a')
-            self.outTxt.write(outString)
-            self.outTxt.close()
+    #         self.outTxt = open("commands.txt",'a')
+    #         self.outTxt.write(outString)
+    #         self.outTxt.close()
 
-            self.callSync("commands.txt")
+    #         self.callSync("commands.txt")
 
-            # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+    #         # subprocess.run(["powershell","-Command",self.commandString], capture_output=True)
+
+    def stopFunc(self):
+        self.commandNum += 1
+
+        self.console.setText("EMERGENCY STOP INITIATED")
+        priorText = self.priorCommands.text()
+        self.priorCommands.setText(priorText + "\nEmergency stop initiated")
+
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
+
+        # Write output to file
+        outString = str(self.commandNum) + ", stop, " + current_time + "\n"
+
+        self.outTxt = open("commands.txt",'a')
+        self.outTxt.write(outString)
+        self.outTxt.close()
+
+        self.callSync("commands.txt")
     
 
     def toggleRecording(self):
